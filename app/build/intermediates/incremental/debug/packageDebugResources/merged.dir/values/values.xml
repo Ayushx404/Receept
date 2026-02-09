@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#079992</color>
+    <string name="app_name">Receipt &amp; Warranty</string>
+    <string name="default_web_client_id">1081995901013-fsdrnogu1alkrbufn0li24f9ks94vi94.apps.googleusercontent.com</string>
+    <style name="Theme.ReceiptWarranty" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

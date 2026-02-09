@@ -1,0 +1,6 @@
+firebase-admin==7.1.0
+firebase-functions==0.5.0
+google-cloud-firestore==3.0.0
+google-cloud-storage==2.18.0
+google-cloud-functions==1.19.0
+requests==2.31.0

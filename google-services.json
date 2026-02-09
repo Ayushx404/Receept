@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1081995901013",
+    "project_id": "receipt-warranty-tracker-c0fd9",
+    "storage_bucket": "receipt-warranty-tracker-c0fd9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1081995901013:android:872a6ab07d991d48edbcdc",
+        "android_client_info": {
+          "package_name": "com.receiptwarranty.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD--zPU3Z6nZYfzyln5YdIZgsOKFj5AAcg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
