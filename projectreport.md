@@ -239,14 +239,14 @@ flowchart TD
 #### Cloud Collections (Firestore)
 ```mermaid
 graph TD
-    U[users/{uid}] --> R[receipts]
-    U --> P[profile/info]
-    U --> M[metadata/sync]
+    U["users/{uid}"] --> R["receipts"]
+    U --> P["profile"]
+    U --> M["metadata"]
 
-    R --- R1[Cloud receipt/warranty documents]
-    P --- P1[User profile metadata]
-    M --- M1[Sync metadata]
-```
+    R --- R1["Cloud receipt/warranty documents"]
+    P --- P1["User profile document"]
+    M --- M1["Sync metadata document"]
+
 
 ### 4.4 ER Diagrams
 ```mermaid
