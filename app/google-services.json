@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "695792889051",
+    "project_id": "receipt-and-warranty-1e5df",
+    "storage_bucket": "receipt-and-warranty-1e5df.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695792889051:android:7fe7ffd69b039ff40730fe",
+        "android_client_info": {
+          "package_name": "com.receiptwarranty.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "695792889051-19snd4484tc5hfgi7ds13ri8920tc665.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.receiptwarranty.app",
+            "certificate_hash": "d95aa5f4c5a99fdaacf23967027ae4ce71fc8ebe"
+          }
+        },
+        {
+          "client_id": "695792889051-lk4haeb1q5ku4ek3vpcmddeg0mj3h78c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAciVF00wagldKUYD268X_ORS3gZXPgsr0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695792889051-lk4haeb1q5ku4ek3vpcmddeg0mj3h78c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

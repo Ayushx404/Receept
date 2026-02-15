@@ -1,0 +1,9 @@
+﻿/build/
+/.gradle/
+app/build/
+*.apk
+.idea/
+.cursor/
+local.properties
+nul
+$null
