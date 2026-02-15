@@ -246,6 +246,7 @@ graph TD
     R --- R1["Cloud receipt/warranty documents"]
     P --- P1["User profile document"]
     M --- M1["Sync metadata document"]
+```
 
 
 ### 4.4 ER Diagrams
@@ -283,6 +284,7 @@ erDiagram
         long deletedAt
     }
 ```
+
 
 ### 4.5 DFD/UML Diagrams
 
