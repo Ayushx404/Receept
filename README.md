@@ -1,125 +1,154 @@
-# Receipt Warranty Tracker
+# Receipt & Warranty (Android)
 
-A modern Android application for managing receipts and warranty cards with cloud sync, Google Login, and customizable themes.
+Android app for storing receipts/warranties with local Room storage, Google sign-in, Firestore sync, Google Drive image upload, and reminder notifications.
 
-## Features
+This README is generated from the current source code and project config in this repo.
 
-- **Google Authentication** - Secure sign-in with Google account
-- **Cloud Sync** - Offline-first architecture with real-time sync to Firebase
-- **Dynamic Categories** - Create and manage custom categories
-- **Customizable Themes** - Choose your preferred colors and theme mode (Light/Dark/System)
-- **Google Drive Export** - Export your data as JSON to Google Drive
-- **Warranty Reminders** - Get notified before warranties expire
-- **Push Notifications** - Real-time sync and warranty expiry notifications
+## What is in this repo
 
-## Tech Stack
+- Android app module: `app/`
+- Firebase config files: `firebase.json`, `.firebaserc`, `firestore.rules`, `firestore.indexes.json`
+- No backend `functions/` directory exists in this repository
 
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose
-- **Architecture**: MVVM + Clean Architecture
-- **Database**: Room (local) + Firestore (cloud)
-- **Authentication**: Google OAuth 2.0
-- **Background Sync**: WorkManager
-- **Push Notifications**: Firebase Cloud Messaging
-- **Backend**: Python Cloud Functions (Firebase)
+## Tech Stack (from code)
 
-## Setup Instructions
+- Kotlin `2.0.0`
+- Android Gradle Plugin `8.7.2`
+- Gradle wrapper `8.9`
+- Java target `17`
+- Jetpack Compose (BOM `2024.06.00`)
+- Room `2.6.1`
+- WorkManager `2.9.0`
+- Firebase Auth + Firestore (BOM `33.1.0`)
+- Google Sign-In `21.2.0`
+- Google Drive API (`google-api-client-android`, `google-api-services-drive`)
+- ML Kit Text Recognition `16.0.0`
 
-### 1. Firebase Setup
+## Prerequisites
 
-1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
-2. Add an Android app with package name `com.receiptwarranty.app`
-3. Enable Authentication → Google Sign-In provider
-4. Enable Cloud Firestore Database
-5. Enable Cloud Functions
-6. Enable Firebase Cloud Messaging
-7. Download `google-services.json` and replace the template in `app/`
+1. Android Studio (latest stable recommended)
+2. Android SDK 35 installed
+3. JDK 17
+4. A Firebase project
+5. A Google Cloud project (same project as Firebase) with Drive API enabled
 
-### 2. Google Cloud Console Setup
+## Install and Setup
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Enable the following APIs:
-   - Google Drive API
-   - Firebase Cloud Messaging API
-3. Create OAuth 2.0 credentials for Android
-4. Add your app's SHA-1 fingerprint:
-   ```bash
-   keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-   ```
-
-### 3. Cloud Functions Setup
+### 1. Clone and open
 
 ```bash
-cd functions
-pip install -r requirements.txt
-firebase deploy --only functions
+git clone <your-repo-url>
+cd PROJECT
 ```
 
-### 4. Run the App
+Open the folder in Android Studio and let Gradle sync.
 
-1. Open the project in Android Studio
-2. Sync Gradle files
-3. Run on an emulator or physical device
+### 2. Configure Firebase Android app
 
-## Configuration
+In Firebase Console:
 
-### Theme Colors
+1. Create/select a project.
+2. Add Android app with package name: `com.receiptwarranty.app`
+3. Download `google-services.json`
+4. Place it at: `app/google-services.json`
 
-Default colors:
-- Primary: #079992 (Teal)
-- Secondary: #047A74 (Dark Teal)
+This repo currently already has an `app/google-services.json`; replace it if you are using your own Firebase project.
 
-### Sync Settings
+### 3. Configure Google Sign-In for Firebase Auth
 
-- Sync interval: 15 minutes (configurable)
-- Offline-first architecture: Changes are saved locally and synced when online
+The app uses `default_web_client_id` from `app/src/main/res/values/strings.xml`.
 
-## Project Structure
+1. In Google Cloud Console, create OAuth credentials for your Firebase project.
+2. Ensure you have a Web client ID.
+3. Set this value in:
+   - `app/src/main/res/values/strings.xml`
+   - key: `default_web_client_id`
 
-```
-app/src/main/java/com/receiptwarranty/app/
-├── data/
-│   ├── local/          # Room database, DAOs, DataStore
-│   ├── remote/         # Firebase, Drive API
-│   ├── repository/     # Repository pattern
-│   └── sync/          # Sync manager
-├── domain/
-│   └── model/         # Domain models
-├── ui/
-│   ├── navigation/    # Navigation setup
-│   ├── screens/       # UI screens
-│   ├── components/   # Reusable components
-│   └── theme/        # Theme configuration
-└── workers/          # Background workers (FCM, reminders)
+### 4. Add SHA fingerprints
 
-functions/           # Python Cloud Functions
-├── main.py
-├── auth_handler.py
-├── sync_handler.py
-├── notification_handler.py
-└── export_handler.py
+Add your debug/release SHA certificates in Firebase Android app settings.
+
+Debug SHA-1 example:
+
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
 ```
 
-## API Reference
+For Windows PowerShell, keystore is typically under:
+`$env:USERPROFILE\.android\debug.keystore`
 
-### Cloud Functions Endpoints
+### 5. Enable required Firebase products
 
-- `export_user_data?userId={uid}` - Export all user data
-- `get_sync_status?userId={uid}` - Get sync status
-- `update_profile` - Update user profile
+1. Firebase Authentication
+   - Enable `Google` provider.
+2. Cloud Firestore
+   - Create database (native mode).
 
-### Firestore Collections
+### 6. Enable required Google APIs
 
+In Google Cloud Console, enable:
+
+1. `Google Drive API`
+
+Drive scopes are requested in code:
+- `https://www.googleapis.com/auth/drive.file`
+- `https://www.googleapis.com/auth/drive.appdata`
+
+### 7. Deploy Firestore rules/indexes (optional but recommended)
+
+If you use Firebase CLI:
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase use <your-firebase-project-id>
+firebase deploy --only firestore
 ```
-users/{userId}/
-├── profile/          # User profile
-├── receipts/        # Receipt documents
-├── warranties/      # Warranty documents
-├── categories/      # Category documents
-├── syncMetadata/    # Sync metadata
-└── fcmTokens/       # FCM tokens for notifications
+
+Rules and indexes are taken from:
+- `firestore.rules`
+- `firestore.indexes.json`
+
+## Build and Run
+
+### Android Studio
+
+1. Sync Gradle.
+2. Select a device/emulator with Android 14+ (project `minSdk = 34`).
+3. Run app.
+
+### Command line (Windows)
+
+```powershell
+.\gradlew.bat assembleDebug
+.\gradlew.bat installDebug
 ```
 
-## License
+## First-run behavior
 
-MIT License
+1. App asks for:
+   - Notifications (`POST_NOTIFICATIONS`, Android 13+)
+   - Media images (`READ_MEDIA_IMAGES`)
+2. User signs in with Google.
+3. App initializes Firestore/Drive sync using authenticated user.
+
+## Notes and Constraints from Code
+
+- `minSdk = 34`, so Android 14+ devices/emulators are required.
+- Local DB name: `receipt_warranty_db` (Room).
+- WorkManager schedules warranty reminders.
+- Firestore path pattern used by app:
+  - `users/{uid}/receipts/*`
+  - `users/{uid}/profile/info`
+  - `users/{uid}/metadata/sync`
+
+## Troubleshooting
+
+1. `Sign in failed`
+   - Recheck `default_web_client_id` and Firebase SHA fingerprints.
+2. `No internet connection` during sync
+   - Sync methods require network capability check to pass.
+3. Drive upload/download not working
+   - Confirm Drive API enabled and Google sign-in granted Drive scopes.
+4. Build errors about Java/Kotlin
+   - Ensure JDK 17 and Android Studio Gradle JDK is set to 17.
