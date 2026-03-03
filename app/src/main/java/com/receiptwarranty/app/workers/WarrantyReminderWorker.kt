@@ -3,12 +3,14 @@ package com.receiptwarranty.app.workers
 import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.receiptwarranty.app.MainActivity
@@ -36,26 +38,35 @@ class WarrantyReminderWorker(
 
         if (id == -1L) return Result.failure()
 
-        val intent = Intent(applicationContext, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(
+        // Deep-link PendingIntent: tapping the notification opens DetailScreen for this item.
+        val deepLinkUri = "vaultapp://detail/$id".toUri()
+        val deepLinkIntent = android.content.Intent(
+            android.content.Intent.ACTION_VIEW,
+            deepLinkUri,
             applicationContext,
-            id.toInt(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            MainActivity::class.java
         )
+        val pendingIntent: PendingIntent = TaskStackBuilder.create(applicationContext).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(
+                id.toInt(),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )!!
+        }
 
         val daysText = when (daysBefore) {
             1 -> "tomorrow"
-            7 -> "in 7 days"
+            7 -> "in 1 week"
+            14 -> "in 2 weeks"
+            30 -> "in 1 month"
+            90 -> "in 3 months"
             else -> "in $daysBefore days"
         }
 
         val notification = NotificationCompat.Builder(applicationContext, ReceiptWarrantyApp.CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("Warranty Expiring Soon")
-            .setContentText("Warranty for \"$title\" expires $daysText. Check now?")
+            .setContentText("Warranty for \"$title\" expires $daysText. Tap to view.")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

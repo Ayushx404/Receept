@@ -15,11 +15,16 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.api.services.drive.model.File as DriveFile
 import com.google.api.services.drive.model.FileList
+import com.receiptwarranty.app.data.auth.GoogleAuthManager
+import com.receiptwarranty.app.util.PreferenceKeys
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File as LocalFile
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 data class DriveUploadResult(
     val webViewLink: String,
@@ -27,9 +32,16 @@ data class DriveUploadResult(
     val downloadLink: String? = null
 )
 
-class DriveStorageManager(private val context: Context, private val userId: String) {
+@Singleton
+class DriveStorageManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val authManager: GoogleAuthManager
+) {
 
     private val TAG = "DriveStorageManager"
+    
+    private val userId: String
+        get() = authManager.getCurrentUser()?.uid ?: "local"
     
     private var driveService: Drive? = null
     private var receiptFolderId: String? = null
@@ -137,9 +149,28 @@ class DriveStorageManager(private val context: Context, private val userId: Stri
         return result.files.firstOrNull()
     }
 
-    suspend fun uploadImage(localUri: String): Result<DriveUploadResult> = withContext(Dispatchers.IO) {
+    suspend fun findFileByName(fileName: String): DriveFile? = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Starting image upload for: $localUri")
+            val service = getDriveService() ?: return@withContext null
+            val folderId = getOrCreateAppFolder() ?: return@withContext null
+            
+            val escapedName = fileName.replace("'", "\\'")
+            val result: FileList = service.files().list()
+                .setQ("name='$escapedName' and '$folderId' in parents and trashed=false")
+                .setSpaces("drive")
+                .setFields("files(id, name)")
+                .setPageSize(1)
+                .execute()
+            result.files.firstOrNull()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error finding file: ${e.message}")
+            null
+        }
+    }
+
+    suspend fun uploadImage(localUri: String, itemId: Long? = null): Result<DriveUploadResult> = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "Starting image upload for: $localUri, itemId: $itemId")
             
             val folderId = getOrCreateAppFolder()
             if (folderId == null) {
@@ -149,7 +180,6 @@ class DriveStorageManager(private val context: Context, private val userId: Stri
             
             val uri = Uri.parse(localUri)
             
-            // Check if it's a content URI and try to open
             val inputStream = try {
                 context.contentResolver.openInputStream(uri)
             } catch (e: Exception) {
@@ -167,7 +197,21 @@ class DriveStorageManager(private val context: Context, private val userId: Stri
             
             Log.d(TAG, "Image read: ${imageBytes.size} bytes")
             
-            val fileName = "${UUID.randomUUID()}.jpg"
+            // Use deterministic filename if itemId provided, otherwise use UUID
+            val fileName = itemId?.let { "receipt_$it.jpg" } ?: "${UUID.randomUUID()}.jpg"
+            
+            // Check if file with this name already exists to prevent duplicates
+            val existingFile = findFileByName(fileName)
+            if (existingFile != null) {
+                Log.d(TAG, "Found existing file with same name: ${existingFile.id}")
+                val directDownloadLink = "https://drive.google.com/uc?export=download&id=${existingFile.id}"
+                val result = DriveUploadResult(
+                    webViewLink = "https://drive.google.com/file/d/${existingFile.id}/view",
+                    fileId = existingFile.id,
+                    downloadLink = directDownloadLink
+                )
+                return@withContext Result.success(result)
+            }
             
             val fileMetadata = DriveFile()
             fileMetadata.name = fileName
@@ -184,10 +228,8 @@ class DriveStorageManager(private val context: Context, private val userId: Stri
             
             Log.d(TAG, "Upload successful! File ID: ${file.id}, WebLink: ${file.webViewLink}, ContentLink: ${file.webContentLink}")
             
-            // Store file ID in SharedPreferences for later use
             saveFileIdMapping(file.id, fileName)
             
-            // Use direct download link for image loading (webContentLink)
             val directDownloadLink = file.webContentLink ?: "https://drive.google.com/uc?export=download&id=${file.id}"
             
             val result = DriveUploadResult(
@@ -258,15 +300,9 @@ class DriveStorageManager(private val context: Context, private val userId: Stri
         }
     }
 
-    suspend fun getFileIdFromUrl(webViewLink: String): String? = withContext(Dispatchers.IO) {
-        // Store a mapping of file IDs when uploading
-        // For now, return the link as-is and handle differently
-        null
-    }
-
     private fun saveFileIdMapping(fileId: String, fileName: String) {
         try {
-            val prefs = context.getSharedPreferences("drive_file_mapping", Context.MODE_PRIVATE)
+            val prefs = context.getSharedPreferences(PreferenceKeys.DRIVE_FILE_MAPPING, Context.MODE_PRIVATE)
             prefs.edit().putString(fileName, fileId).apply()
         } catch (e: Exception) {
             Log.w(TAG, "Could not save file mapping: ${e.message}")
@@ -275,7 +311,7 @@ class DriveStorageManager(private val context: Context, private val userId: Stri
 
     private fun removeFileIdMapping(fileId: String) {
         try {
-            val prefs = context.getSharedPreferences("drive_file_mapping", Context.MODE_PRIVATE)
+            val prefs = context.getSharedPreferences(PreferenceKeys.DRIVE_FILE_MAPPING, Context.MODE_PRIVATE)
             val editor = prefs.edit()
             // We don't have filename here, so we'd need to search
             // For now, just clear all (not ideal but functional)

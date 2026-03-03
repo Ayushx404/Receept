@@ -3,7 +3,6 @@ package com.receiptwarranty.app.viewmodel
 import android.app.Activity
 import android.content.Intent
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.receiptwarranty.app.data.auth.GoogleAuthManager
@@ -12,7 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel(
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class AuthViewModel @Inject constructor(
     private val googleAuthManager: GoogleAuthManager
 ) : ViewModel() {
 
@@ -27,11 +30,9 @@ class AuthViewModel(
     }
 
     private fun checkCurrentUser() {
-        _authState.value = if (googleAuthManager.isSignedIn()) {
-            AuthState.Authenticated(googleAuthManager.getCurrentUser()!!)
-        } else {
-            AuthState.Unauthenticated
-        }
+        _authState.value = googleAuthManager.getCurrentUser()?.let { user ->
+            AuthState.Authenticated(user)
+        } ?: AuthState.Unauthenticated
     }
 
     fun getSignInIntent(): Intent {
@@ -62,14 +63,6 @@ class AuthViewModel(
         }
     }
 
-    class Factory(
-        private val googleAuthManager: GoogleAuthManager
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AuthViewModel(googleAuthManager) as T
-        }
-    }
 }
 
 sealed class AuthState {

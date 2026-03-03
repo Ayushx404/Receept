@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,13 +26,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.receiptwarranty.app.data.ReceiptType
+import com.receiptwarranty.app.ui.theme.VaultShape
+
+enum class FabActionType {
+    SCAN, GALLERY, MANUAL, BILL, SUBSCRIPTION
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TypeSelectionBottomSheet(
-    onTypeSelected: (ReceiptType) -> Unit,
+    onActionSelected: (FabActionType) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
@@ -41,30 +49,41 @@ fun TypeSelectionBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
             Text(
-                text = "Add New Item",
-                style = MaterialTheme.typography.headlineSmall,
+                text = "Add to Vault",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            TypeSelectionCard(
-                type = ReceiptType.RECEIPT,
-                icon = Icons.Default.Receipt,
-                title = "Receipt",
-                description = "Store a purchase receipt for your records",
-                onClick = { onTypeSelected(ReceiptType.RECEIPT) }
+            // 1. Add Receipt / Warranty
+            ActionCard(
+                icon = Icons.Default.Description,
+                title = "Add Receipt / Warranty",
+                description = "Track a purchase or warranty digitally",
+                onClick = { onActionSelected(FabActionType.MANUAL) }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            TypeSelectionCard(
-                type = ReceiptType.WARRANTY,
-                icon = Icons.Default.Verified,
-                title = "Warranty",
-                description = "Track a warranty with expiry reminders",
-                onClick = { onTypeSelected(ReceiptType.WARRANTY) }
+            // 2. Add Bill
+            ActionCard(
+                icon = Icons.Default.CreditCard,
+                title = "Add Bill",
+                description = "Track a one-time or recurring bill",
+                onClick = { onActionSelected(FabActionType.BILL) }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 3. Add Subscription
+            ActionCard(
+                icon = Icons.Default.Refresh,
+                title = "Add Subscription",
+                description = "Track a subscription service",
+                onClick = { onActionSelected(FabActionType.SUBSCRIPTION) }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -74,8 +93,7 @@ fun TypeSelectionBottomSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TypeSelectionCard(
-    type: ReceiptType,
+private fun ActionCard(
     icon: ImageVector,
     title: String,
     description: String,
@@ -84,11 +102,9 @@ private fun TypeSelectionCard(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
+        shape = VaultShape.large,
         colors = CardDefaults.cardColors(
-            containerColor = when (type) {
-                ReceiptType.RECEIPT -> MaterialTheme.colorScheme.primaryContainer
-                ReceiptType.WARRANTY -> MaterialTheme.colorScheme.secondaryContainer
-            }
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
         Row(
@@ -100,19 +116,17 @@ private fun TypeSelectionCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = when (type) {
-                    ReceiptType.RECEIPT -> MaterialTheme.colorScheme.primary
-                    ReceiptType.WARRANTY -> MaterialTheme.colorScheme.secondary
-                }
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(20.dp))
 
             Column {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = description,
