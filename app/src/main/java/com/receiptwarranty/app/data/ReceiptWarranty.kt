@@ -51,12 +51,20 @@ data class ReceiptWarranty(
 ) {
     fun warrantyStatus(): WarrantyStatus {
         if (type == ReceiptType.RECEIPT) return WarrantyStatus.NO_WARRANTY
-        val expiry = warrantyExpiryDate ?: return WarrantyStatus.NO_WARRANTY
+        
+        val expiry = warrantyExpiryDate ?: return if (type == ReceiptType.BILL || type == ReceiptType.SUBSCRIPTION) {
+            WarrantyStatus.VALID // Assume valid if no date set yet for bills/subs
+        } else {
+            WarrantyStatus.NO_WARRANTY
+        }
+
         val now = System.currentTimeMillis()
         val sevenDaysMs = 7 * 24 * 60 * 60 * 1000L
+        
         return when {
-            type == ReceiptType.BILL -> when {
-                expiry - now <= sevenDaysMs -> WarrantyStatus.EXPIRING_SOON  // billing soon
+            type == ReceiptType.BILL || type == ReceiptType.SUBSCRIPTION -> when {
+                expiry - now <= sevenDaysMs && expiry >= now -> WarrantyStatus.EXPIRING_SOON // Renews soon
+                expiry < now -> WarrantyStatus.EXPIRED
                 else -> WarrantyStatus.VALID
             }
             expiry < now -> WarrantyStatus.EXPIRED

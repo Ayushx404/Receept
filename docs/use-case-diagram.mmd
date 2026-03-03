@@ -1,0 +1,147 @@
+```mermaid
+graph TD
+    %% Actors
+    USER(("👤 User")):::actor
+    SYSTEM(("⚙️ System<br/>WorkManager")):::system
+    
+    subgraph APP["ReceiptWarranty App"]
+        subgraph AUTH["Authentication"]
+            UC1["Sign In"]:::usecase
+            UC2["Sign Out"]:::usecase
+        end
+        
+        subgraph CRUD["CRUD Operations"]
+            UC3["Add Receipt"]:::usecase
+            UC4["Add Warranty"]:::usecase
+            UC5["Edit Item"]:::usecase
+            UC6["View Item Details"]:::usecase
+            UC7["Delete Item"]:::usecase
+        end
+        
+        subgraph BROWSE["Browse & View"]
+            UC8["Search Items"]:::usecase
+            UC9["Filter Items"]:::usecase
+            UC10["View Dashboard"]:::usecase
+            UC11["View Statistics"]:::usecase
+        end
+        
+        subgraph SYNC["Sync & Export"]
+            UC12["Manual Sync"]:::usecase
+            UC13["Auto Sync (on save)"]:::usecase
+            UC14["Export to CSV"]:::usecase
+        end
+        
+        subgraph REMIND["Reminders"]
+            UC15["Schedule Reminder"]:::usecase
+            UC16["Cancel Reminder"]:::usecase
+            UC17["Receive Notification"]:::usecase
+        end
+        
+        subgraph IMAGE["Image Handling"]
+            UC18["Upload Image"]:::usecase
+            UC19["View Image"]:::usecase
+        end
+    end
+    
+    %% Actor relationships
+    USER --- UC1
+    USER --- UC2
+    USER --- UC3
+    USER --- UC4
+    USER --- UC5
+    USER --- UC6
+    USER --- UC7
+    USER --- UC8
+    USER --- UC9
+    USER --- UC10
+    USER --- UC11
+    USER --- UC12
+    USER --- UC14
+    USER --- UC15
+    USER --- UC16
+    
+    SYSTEM --- UC17
+    
+    %% Include relationships
+    UC3 -->|"<<include>>"| UC1
+    UC4 -->|"<<include>>"| UC1
+    UC12 -->|"<<include>>"| UC1
+    UC14 -->|"<<include>>"| UC1
+    
+    %% Extend relationships
+    UC3 -->|"<<extend>>"| UC18
+    UC4 -->|"<<extend>>"| UC18
+    UC6 -->|"<<extend>>"| UC19
+    
+    %% Trigger relationships
+    UC15 -.->|"triggers"| UC17
+    
+    %% Auto Sync is automatic (dashed line)
+    UC4 -.->|"triggers automatically"| UC13
+    
+    %% Styling
+    classDef actor fill:#dae8fc,stroke:#6c8ebf
+    classDef system fill:#e1d5e7,stroke:#9673a6
+    classDef usecase fill:#fff2cc,stroke:#d6b656
+    
+    style APP fill:#fafafa,stroke:#666666,stroke-width:2,stroke-dasharray:5 5
+    style AUTH fill:#dae8fc,stroke:#6c8ebf
+    style CRUD fill:#d5e8d4,stroke:#82b366
+    style BROWSE fill:#f8cecc,stroke:#b85450
+    style SYNC fill:#fff2cc,stroke:#d6b656
+    style REMIND fill:#e1d5e7,stroke:#9673a6
+    style IMAGE fill:#ffe6cc,stroke:#d79b00
+```
+
+---
+
+## Use Case Description
+
+### Actors
+- **User** - Authenticated user of the app
+- **System** - WorkManager background service
+
+### Use Cases
+
+#### Authentication
+| Use Case | Description |
+|----------|-------------|
+| Sign In | Authenticate with Google Firebase Auth |
+| Sign Out | Sign out of the account |
+
+#### CRUD Operations
+| Use Case | Description |
+|----------|-------------|
+| Add Receipt | Create a new receipt entry |
+| Add Warranty | Create a new warranty entry |
+| Edit Item | Modify existing receipt/warranty |
+| View Item Details | See full details of an item |
+| Delete Item | Remove item from storage |
+
+#### Browse & View
+| Use Case | Description |
+|----------|-------------|
+| Search Items | Search by title, company, notes |
+| Filter Items | Filter by type, category, status |
+| View Dashboard | See overview and quick stats |
+| View Statistics | View detailed counts and charts |
+
+#### Sync & Export
+| Use Case | Description |
+|----------|-------------|
+| Manual Sync | Trigger full sync manually |
+| Auto Sync | Automatic sync on item save |
+| Export to CSV | Export all data to CSV file |
+
+#### Reminders
+| Use Case | Description |
+|----------|-------------|
+| Schedule Reminder | Set warranty expiry reminder |
+| Cancel Reminder | Remove scheduled reminder |
+| Receive Notification | Get notification when triggered |
+
+#### Image Handling
+| Use Case | Description |
+|----------|-------------|
+| Upload Image | Attach image to receipt/warranty |
+| View Image | View attached image |

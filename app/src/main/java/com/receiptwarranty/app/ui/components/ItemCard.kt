@@ -186,7 +186,7 @@ fun ItemCard(
 
                         if (item.warrantyExpiryDate != null) {
                             val label = when (item.type) {
-                                ReceiptType.BILL -> "Renews: ${formatDate(item.warrantyExpiryDate)}"
+                                ReceiptType.BILL, ReceiptType.SUBSCRIPTION -> "Renews: ${formatDate(item.warrantyExpiryDate)}"
                                 ReceiptType.WARRANTY -> "Expires: ${formatDate(item.warrantyExpiryDate)}"
                                 else -> null
                             }
@@ -203,6 +203,7 @@ fun ItemCard(
                     // Status
                     StatusChip(
                         status = item.warrantyStatus(),
+                        itemType = item.type,
                         labelOverride = statusOverride,
                         colorOverride = statusColorOverride
                     )

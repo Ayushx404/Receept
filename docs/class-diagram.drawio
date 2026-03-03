@@ -1,0 +1,106 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Class Diagram" id="class">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="ReceiptWarranty App - Class Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="500" y="20" width="400" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ReceiptWarranty" value="&lt;&lt;Entity&gt;&gt;&#xa;ReceiptWarranty" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="180" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="rw_attrs" value="- id: Long&#xa;- type: ReceiptType&#xa;- title: String&#xa;- company: String&#xa;- category: String?&#xa;- imageUri: String?&#xa;- driveFileId: String?&#xa;- cloudId: String?&#xa;- purchaseDate: Long?&#xa;- warrantyExpiryDate: Long?&#xa;- reminderDays: ReminderDays?&#xa;- notes: String?&#xa;- createdAt: Long&#xa;- updatedAt: Long" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="50" y="130" width="160" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="DeletedItem" value="&lt;&lt;Entity&gt;&gt;&#xa;DeletedItem" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="370" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="di_attrs" value="- cloudId: String&#xa;- userId: String&#xa;- deletedAt: Long" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="50" y="400" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ReceiptWarrantyDao" value="&lt;&lt;DAO&gt;&gt;&#xa;ReceiptWarrantyDao" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="280" y="100" width="180" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="dao_attrs" value="+ getAll(): Flow&lt;List&gt;&#xa;+ getById(id): Flow&lt;?&gt;&#xa;+ insert(item): Long&#xa;+ update(item)&#xa;+ delete(item)&#xa;+ getAllCategories()&#xa;+ getCategoryStats()" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="290" y="130" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ReceiptWarrantyRepository" value="ReceiptWarrantyRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="520" y="100" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="repo_attrs" value="- dao: ReceiptWarrantyDao&#xa;- userId: String&#xa;&#xa;+ getAll(): Flow&lt;List&gt;&#xa;+ insert(item): Long&#xa;+ update(item)&#xa;+ delete(item)&#xa;+ exportToCSV(): String&#xa;+ getAllDeletedCloudIds()" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="530" y="130" width="180" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="AppContainer" value="AppContainer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="780" y="100" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="ac_attrs" value="- context: Context&#xa;- userId: String&#xa;&#xa;+ repository: ReceiptWarrantyRepository&#xa;+ syncStateManager: SyncStateManager?&#xa;+ warrantyReminderScheduler" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="790" y="130" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ReceiptWarrantyViewModel" value="ReceiptWarrantyViewModel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="780" y="280" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="vm_attrs" value="- repository: ReceiptWarrantyRepository&#xa;- syncStateManager: SyncStateManager?&#xa;&#xa;+ uiState: StateFlow&#xa;+ items: StateFlow&#xa;+ insertOrUpdate(item)&#xa;+ delete(item)&#xa;+ exportToCSV(context)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="790" y="310" width="180" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="FirestoreRepository" value="FirestoreRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1020" y="100" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="fs_attrs" value="- userId: String&#xa;- db: FirebaseFirestore&#xa;&#xa;+ uploadItem(item): Result&#xa;+ downloadAllItems(): Result&#xa;+ deleteItem(id): Result&#xa;+ saveUserProfile()" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="1030" y="130" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DriveStorageManager" value="DriveStorageManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1020" y="270" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="dsm_attrs" value="- context: Context&#xa;- userId: String&#xa;&#xa;+ uploadImage(uri): Result&#xa;+ downloadImage(id): Result&#xa;+ deleteImage(id): Result" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="1030" y="300" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="SyncStateManager" value="SyncStateManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="520" y="300" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="ssm_attrs" value="- dao: ReceiptWarrantyDao&#xa;- firestoreRepo: FirestoreRepository&#xa;- driveManager: DriveStorageManager?&#xa;&#xa;+ syncAll(): Result&#xa;+ syncItem(item): Result&#xa;+ deleteItem(item): Result" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="530" y="330" width="180" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="WarrantyReminderScheduler" value="WarrantyReminderScheduler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="280" y="280" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="wrs_attrs" value="- context: Context&#xa;&#xa;+ scheduleReminder(item)&#xa;+ cancelReminder(id)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="290" y="310" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="GoogleAuthManager" value="GoogleAuthManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="480" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="gam_attrs" value="- context: Context&#xa;&#xa;+ getSignInIntent()&#xa;+ handleSignInResult()&#xa;+ signOut()" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontFamily=Courier New" vertex="1" parent="1">
+          <mxGeometry x="50" y="510" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="ReceiptWarrantyRepository" target="ReceiptWarrantyDao">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="SyncStateManager" target="FirestoreRepository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="SyncStateManager" target="DriveStorageManager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="ReceiptWarrantyViewModel" target="ReceiptWarrantyRepository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="ReceiptWarrantyViewModel" target="SyncStateManager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="ReceiptWarrantyViewModel" target="WarrantyReminderScheduler">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" value="1:N" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#6c8ebf" edge="1" parent="1" source="ReceiptWarranty" target="DeletedItem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" value="uses" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="SyncStateManager" target="ReceiptWarrantyRepository">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="Legend:&#xa;Blue: Room Entities&#xa;Green: Data Layer&#xa;Yellow: ViewModel/App&#xa;Red: Remote/Firestore&#xa;Purple: Workers/Scheduling" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="180" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

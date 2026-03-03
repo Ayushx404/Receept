@@ -1,0 +1,115 @@
+```mermaid
+erDiagram
+    %% Firebase Auth (External)
+    USER ||--o{ RECEIPT_WARRANTY : "has"
+    USER ||--o{ DELETED_ITEM : "tracks"
+    
+    %% Local to Cloud relationships
+    RECEIPT_WARRANTY }o--|| DRIVE_FILE : "stores_image"
+    RECEIPT_WARRANTY |o--o| FIRESTORE_RECEIPT : "syncs_to"
+    USER ||--|| FIRESTORE_PROFILE : "has"
+    USER ||--|| FIRESTORE_SYNC : "has"
+    
+    %% Room Database Entities
+    RECEIPT_WARRANTY {
+        long id PK
+        string type
+        string title
+        string company
+        string category
+        string imageUri
+        string driveFileId FK
+        string cloudId
+        long purchaseDate
+        long warrantyExpiryDate
+        string reminderDays
+        string notes
+        long createdAt
+        long updatedAt
+    }
+    
+    DELETED_ITEM {
+        string cloudId PK
+        string userId PK
+        long deletedAt
+    }
+    
+    %% Firestore Cloud Entities
+    FIRESTORE_RECEIPT {
+        string id PK
+        string type
+        string title
+        string company
+        string category
+        string imageUri
+        string driveFileId
+        long purchaseDate
+        long warrantyExpiryDate
+        string reminderDays
+        string notes
+        long createdAt
+        long updatedAt
+        long localId
+    }
+    
+    FIRESTORE_PROFILE {
+        string userId PK
+        string email
+        string displayName
+        long lastSyncTime
+        long createdAt
+    }
+    
+    FIRESTORE_SYNC {
+        string userId PK
+        long lastSyncTime
+        int pendingChanges
+    }
+    
+    %% Google Drive
+    DRIVE_FILE {
+        string fileId PK
+        string name
+        string webViewLink
+        string downloadLink
+    }
+    
+    %% Firebase User (External)
+    USER {
+        string userId PK
+        string email
+        string displayName
+    }
+
+    %% Style definitions
+    style USER fill:#dae8fc,stroke:#6c8ebf
+    style RECEIPT_WARRANTY fill:#d5e8d4,stroke:#82b366
+    style DELETED_ITEM fill:#d5e8d4,stroke:#82b366
+    style FIRESTORE_RECEIPT fill:#f8cecc,stroke:#b85450
+    style FIRESTORE_PROFILE fill:#f8cecc,stroke:#b85450
+    style FIRESTORE_SYNC fill:#f8cecc,stroke:#b85450
+    style DRIVE_FILE fill:#fff2cc,stroke:#d6b656
+```
+
+---
+
+## ER Diagram Legend
+
+| Entity | Type | Description |
+|--------|------|-------------|
+| **USER** | External | Firebase Authentication |
+| **RECEIPT_WARRANTY** | Local (Room) | Main entity for receipts and warranties |
+| **DELETED_ITEM** | Local (Room) | Tracks deleted items for sync |
+| **FIRESTORE_RECEIPT** | Cloud (Firestore) | Cloud storage of receipts/warranties |
+| **FIRESTORE_PROFILE** | Cloud (Firestore) | User profile data |
+| **FIRESTORE_SYNC** | Cloud (Firestore) | Sync metadata |
+| **DRIVE_FILE** | External | Google Drive image storage |
+
+### Relationships
+
+- **1:N** - One User has Many ReceiptWarranty items
+- **1:N** - One User has Many DeletedItem records
+- **0..1:1** - ReceiptWarranty optionally has one DriveFile (image)
+- **1:1** - User has one FirestoreProfile
+- **1:1** - User has one FirestoreSync metadata
+- **sync** - ReceiptWarranty syncs to FirestoreReceipt

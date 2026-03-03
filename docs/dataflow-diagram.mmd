@@ -1,0 +1,112 @@
+```mermaid
+flowchart TD
+    subgraph EXTERNAL["External Entities"]
+        USER["User"]:::actor
+        SYSTEM["System<br/>(WorkManager)"]:::system
+    end
+    
+    subgraph APP["Android App"]
+        subgraph PROCESSES["Processes"]
+            P1["Add/Edit<br/>Receipt/Warranty"]:::process
+            P2["View/Filter<br/>Items"]:::process
+            P3["Delete<br/>Item"]:::process
+            P4["Cloud Sync<br/>(Full/Item)"]:::process
+            P5["Schedule<br/>Reminder"]:::process
+            P6["Export<br/>CSV"]:::process
+        end
+        
+        subgraph DATASTORES["Data Stores"]
+            DS1["Room DB<br/>(Local)"]:::datastore
+        end
+        
+        subgraph VIEWMODEL["ViewModel Layer"]
+            VM["ReceiptWarranty<br/>ViewModel"]:::viewmodel
+        end
+    end
+    
+    subgraph CLOUD["Cloud Services"]
+        FIREBASE["Firebase<br/>(Auth/Firestore)"]:::external
+        DRIVE["Google Drive<br/>(Images)"]:::external
+    end
+    
+    %% User Interactions
+    USER -->|"1. Login"| AUTH["Authenticate"]:::process
+    AUTH --> FIREBASE
+    USER -->|"2a. Add/Edit data"| P1
+    USER -->|"2b. View items"| P2
+    USER -->|"2c. Delete request"| P3
+    USER -->|"2d. Manual sync"| P4
+    USER -->|"2e. Schedule reminder"| P5
+    USER -->|"2f. Export"| P6
+    
+    %% Process to ViewModel
+    P1 --> VM
+    P2 --> VM
+    P3 --> VM
+    P4 --> VM
+    P5 --> VM
+    P6 --> VM
+    
+    %% ViewModel to Local DB
+    VM -->|"3a. Save to DB"| DS1
+    DS1 -->|"3b. Query items"| VM
+    VM -->|"3c. Delete from DB"| DS1
+    
+    %% Cloud Operations
+    P1 -->|"4a. Upload image"| DRIVE
+    P1 -->|"4b. Upload to cloud"| FIREBASE
+    P3 -->|"5a. Delete from cloud"| FIREBASE
+    P3 -->|"5b. Delete from Drive"| DRIVE
+    P4 -->|"6a. Sync up/down"| FIREBASE
+    P4 -->|"6b. Upload/Download"| DRIVE
+    
+    %% Sync merges with local
+    P4 <-->|"6c. Merge data"| DS1
+    
+    %% Reminder System
+    P5 -->|"7. Schedule"| WORK["WorkManager<br/>(Notifications)"]:::worker
+    WORK -.->|"8. Trigger"| USER
+    
+    %% Export output
+    P6 -->|"9. Export file"| USER
+    
+    %% Definitions
+    classDef actor fill:#dae8fc,stroke:#6c8ebf
+    classDef system fill:#e1d5e7,stroke:#9673a6
+    classDef process fill:#e1d5e7,stroke:#9673a6
+    classDef datastore fill:#d5e8d4,stroke:#82b366
+    classDef viewmodel fill:#fff2cc,stroke:#d6b656
+    classDef worker fill:#e1d5e7,stroke:#9673a6
+    classDef external fill:#f8cecc,stroke:#b85450
+    
+    style EXTERNAL fill:#fafafa,stroke:#666666,stroke-width:2
+    style APP fill:#fafafa,stroke:#666666,stroke-width:2
+    style CLOUD fill:#fafafa,stroke:#666666,stroke-width:2
+```
+
+---
+
+## Data Flow Description
+
+| Step | Flow | Description |
+|------|------|-------------|
+| 1 | User → Auth | User signs in via Google |
+| 2a | User → P1 | User adds/edits receipt or warranty |
+| 2b | User → P2 | User views/filters items list |
+| 2c | User → P3 | User requests to delete item |
+| 2d | User → P4 | User triggers manual sync |
+| 2e | User → P5 | User schedules a reminder |
+| 2f | User → P6 | User exports data to CSV |
+| 3a | VM → DS1 | Save item to local Room DB |
+| 3b | DS1 → VM | Query items from Room DB |
+| 3c | VM → DS1 | Delete from Room DB |
+| 4a | P1 → DRIVE | Upload image to Google Drive |
+| 4b | P1 → FIREBASE | Upload item data to Firestore |
+| 5a | P3 → FIREBASE | Delete from Firestore |
+| 5b | P3 → DRIVE | Delete image from Drive |
+| 6a | P4 → FIREBASE | Full sync with Firestore |
+| 6b | P4 → DRIVE | Upload/download images |
+| 6c | P4 ↔ DS1 | Merge cloud/local data (timestamp-based) |
+| 7 | P5 → WORK | Schedule WorkManager reminder |
+| 8 | WORK → USER | Notification triggered to user |
+| 9 | P6 → USER | Export data to CSV file |

@@ -27,10 +27,11 @@ import com.receiptwarranty.app.ui.theme.ReceiptWarrantyTheme
 import com.receiptwarranty.app.viewmodel.AuthState
 import com.receiptwarranty.app.ui.screens.LoginScreen
 import com.receiptwarranty.app.viewmodel.AuthViewModel
-import com.receiptwarranty.app.data.AppearancePreferences
+import androidx.core.content.edit
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.hilt.navigation.compose.hiltViewModel
 import javax.inject.Inject
+import com.receiptwarranty.app.data.AppearancePreferences
 
 private object PreferenceKeys {
     const val APP_PREFS = "app_prefs"
@@ -45,9 +46,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            enableEdgeToEdge()
-        }
+        enableEdgeToEdge()
         setContent {
             val prefs = getSharedPreferences(PreferenceKeys.APP_PREFS, Context.MODE_PRIVATE)
             var isLocalMode by remember { mutableStateOf(prefs.getBoolean(PreferenceKeys.IS_LOCAL_MODE, false)) }
@@ -83,7 +82,7 @@ class MainActivity : ComponentActivity() {
                                     userEmail = "",
                                     onSignOut = {
                                         isLocalMode = false
-                                        prefs.edit().putBoolean(PreferenceKeys.IS_LOCAL_MODE, false).apply()
+                                        prefs.edit { putBoolean(PreferenceKeys.IS_LOCAL_MODE, false) }
                                     }
                                 )
                             }
@@ -99,7 +98,7 @@ class MainActivity : ComponentActivity() {
                                             onSignOut = { 
                                                 authViewModel.signOut()
                                                 isLocalMode = false
-                                                prefs.edit().putBoolean(PreferenceKeys.IS_LOCAL_MODE, false).apply()
+                                                prefs.edit { putBoolean(PreferenceKeys.IS_LOCAL_MODE, false) }
                                             }
                                         )
                                     }
@@ -111,7 +110,7 @@ class MainActivity : ComponentActivity() {
                                         },
                                         onSkipLogin = {
                                             isLocalMode = true
-                                            prefs.edit().putBoolean(PreferenceKeys.IS_LOCAL_MODE, true).apply()
+                                            prefs.edit { putBoolean(PreferenceKeys.IS_LOCAL_MODE, true) }
                                         },
                                         isLoading = isSigningIn,
                                         errorMessage = (state as? AuthState.Error)?.message
@@ -138,9 +137,6 @@ private fun PermissionHandler(content: @Composable () -> Unit) {
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.READ_MEDIA_IMAGES
                 )
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-                arrayOf()  // No permission needed for media on Android 10+
             }
             else -> {
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)

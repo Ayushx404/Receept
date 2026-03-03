@@ -4,7 +4,6 @@
     <string name="default_web_client_id">695792889051-lk4haeb1q5ku4ek3vpcmddeg0mj3h78c.apps.googleusercontent.com</string>
 
     <!-- App Preferences -->
-    <string name="pref_app_prefs">app_prefs</string>
     <string name="pref_is_local_mode">is_local_mode</string>
     <string name="pref_sync_prefs">sync_prefs</string>
     <string name="pref_drive_file_mapping">drive_file_mapping</string>
@@ -17,8 +16,14 @@
     <string name="notification_warranty_expiring_title">Warranty Expiring Soon</string>
 
     <!-- Common -->
-    <string name="delete_items_count">%d items deleted</string>
-    <string name="delete_single_item">%s deleted</string>
+    <plurals name="delete_items_title">
+        <item quantity="one">Delete 1 item?</item>
+        <item quantity="other">Delete %d items?</item>
+    </plurals>
+    <plurals name="selected_items_description">
+        <item quantity="one">1 selected item</item>
+        <item quantity="other">%d selected items</item>
+    </plurals>
     <string name="undo">Undo</string>
     <string name="csv_exported">CSV exported to Downloads</string>
     <string name="export_failed">Export failed: %s</string>

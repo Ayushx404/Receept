@@ -35,6 +35,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import com.receiptwarranty.app.ui.theme.VaultShape
+import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -251,7 +252,7 @@ fun ReceiptWarrantyNavHost(
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onFinish = {
-                        prefs.edit().putBoolean("has_seen_onboarding", true).apply()
+                        prefs.edit { putBoolean(PreferenceKeys.HAS_SEEN_ONBOARDING, true) }
                         navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }

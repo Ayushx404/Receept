@@ -1,0 +1,125 @@
+```mermaid
+flowchart TB
+    subgraph root["com.receiptwarranty.app"]
+        subgraph data["data/"]
+            data_auth["auth/"]:::green
+            data_remote["remote/"]:::green
+            data_sync["sync/"]:::green
+            data_files["<br/>ReceiptWarranty<br/>DeletedItem<br/>AppDatabase<br/>AppContainer<br/>ReceiptWarrantyDao<br/>ReceiptWarrantyRepository"]:::green
+        end
+        
+        subgraph viewmodel["viewmodel/"]
+            vm_files["<br/>ReceiptWarrantyViewModel<br/>AuthViewModel"]:::yellow
+        end
+        
+        subgraph ui["ui/"]
+            ui_screens["screens/"]:::red
+            ui_components["components/"]:::red
+            ui_theme["theme/"]:::red
+            ui_nav["NavHost"]:::red
+            
+            screens["<br/>HomeScreen<br/>DashboardScreen<br/>SettingsScreen<br/>AddEditScreen<br/>DetailScreen<br/>LoginScreen"]:::red
+            components["<br/>ItemCard<br/>CategorySelector<br/>ReminderSelector<br/>TypeSelectionSheet<br/>DatePicker<br/>DashboardComponents"]:::red
+        end
+        
+        subgraph workers["workers/"]
+            workers_files["<br/>WarrantyReminderWorker<br/>WarrantyReminderScheduler"]:::purple
+        end
+        
+        subgraph util["util/"]
+            util_files["ImageFileManager"]:::gray
+        end
+        
+        app["<br/>MainActivity<br/>ReceiptWarrantyApp"]:::orange
+    end
+    
+    classDef green fill:#d5e8d4,stroke:#82b366
+    classDef yellow fill:#fff2cc,stroke:#d6b656
+    classDef red fill:#f8cecc,stroke:#b85450
+    classDef purple fill:#e1d5e7,stroke:#9673a6
+    classDef gray fill:#f5f5f5,stroke:#666666
+    classDef orange fill:#ffe6cc,stroke:#d79b00
+    
+    data --> data_auth
+    data --> data_remote
+    data --> data_sync
+    data --> data_files
+    viewmodel --> vm_files
+    ui --> ui_screens
+    ui --> ui_components
+    ui --> ui_theme
+    ui --> ui_nav
+    ui_screens --> screens
+    ui_components --> components
+    workers --> workers_files
+    util --> util_files
+```
+
+```mermaid
+flowchart TB
+    subgraph data_sub["data/"]
+        auth["GoogleAuthManager"]:::green
+        remote["<br/>FirestoreRepository<br/>DriveStorageManager<br/>FirestoreModels"]:::green
+        sync["<br/>SyncManager<br/>SyncStateManager"]:::green
+        entities["<br/>ReceiptWarranty<br/>DeletedItem<br/>AppDatabase<br/>AppContainer<br/>ReceiptWarrantyDao<br/>ReceiptWarrantyRepository"]:::green
+    end
+    
+    style data_sub fill:#d5e8d4,stroke:#82b366
+    style auth fill:#d5e8d4,stroke:#82b366
+    style remote fill:#d5e8d4,stroke:#82b366
+    style sync fill:#d5e8d4,stroke:#82b366
+    style entities fill:#d5e8d4,stroke:#82b366
+```
+
+---
+
+## Package Structure (Text)
+
+```
+com.receiptwarranty.app/
+├── data/
+│   ├── auth/
+│   │   └── GoogleAuthManager.kt
+│   ├── remote/
+│   │   ├── FirestoreRepository.kt
+│   │   ├── DriveStorageManager.kt
+│   │   └── FirestoreModels.kt
+│   ├── sync/
+│   │   ├── SyncManager.kt
+│   │   └── SyncStateManager.kt
+│   ├── ReceiptWarranty.kt
+│   ├── DeletedItem.kt
+│   ├── AppDatabase.kt
+│   ├── AppContainer.kt
+│   ├── ReceiptWarrantyDao.kt
+│   └── ReceiptWarrantyRepository.kt
+├── viewmodel/
+│   ├── ReceiptWarrantyViewModel.kt
+│   └── AuthViewModel.kt
+├── ui/
+│   ├── screens/
+│   │   ├── HomeScreen.kt
+│   │   ├── DashboardScreen.kt
+│   │   ├── SettingsScreen.kt
+│   │   ├── AddEditScreen.kt
+│   │   ├── DetailScreen.kt
+│   │   └── LoginScreen.kt
+│   ├── components/
+│   │   ├── ItemCard.kt
+│   │   ├── CategorySelector.kt
+│   │   ├── ReminderSelector.kt
+│   │   ├── TypeSelectionSheet.kt
+│   │   ├── DatePicker.kt
+│   │   └── DashboardComponents.kt
+│   ├── theme/
+│   │   ├── Theme.kt
+│   │   └── Type.kt
+│   └── ReceiptWarrantyNavHost.kt
+├── workers/
+│   ├── WarrantyReminderWorker.kt
+│   └── WarrantyReminderScheduler.kt
+├── util/
+│   └── ImageFileManager.kt
+├── MainActivity.kt
+└── ReceiptWarrantyApp.kt
+```

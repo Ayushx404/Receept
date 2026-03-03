@@ -63,6 +63,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -119,8 +120,8 @@ fun AddEditScreen(
     val iconStyle = appearanceSettings.iconStyle
     var imageUri by remember { mutableStateOf(item?.imageUri) }
     // Default to today to remove friction
-    var purchaseDate by remember { mutableStateOf(item?.purchaseDate ?: System.currentTimeMillis()) }
-    var warrantyExpiryDate by remember { mutableStateOf(item?.warrantyExpiryDate) }
+    var purchaseDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var warrantyExpiryDate by remember { mutableLongStateOf(System.currentTimeMillis() + 31536000000L) }
     var reminderDays by remember { mutableStateOf<ReminderDays?>(item?.reminderDays ?: ReminderDays.ONE_WEEK) }
     var customReminderDays by remember { mutableStateOf(item?.customReminderDays) }
     var notes by remember { mutableStateOf(item?.notes ?: "") }

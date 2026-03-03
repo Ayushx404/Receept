@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -99,7 +100,9 @@ import com.receiptwarranty.app.ui.components.VaultCurrencyPickerSheet
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material.icons.filled.DataObject
+import androidx.core.graphics.toColorInt
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,8 +122,8 @@ fun SettingsScreen(
     onNavigateToAdvanced: () -> Unit,
     onBack: () -> Unit
 ) {
-    var versionClicks by remember { mutableStateOf(0) }
-    var lastClickTime by remember { mutableStateOf(0L) }
+    var versionClicks by remember { mutableIntStateOf(0) }
+    var lastClickTime by remember { mutableLongStateOf(0L) }
     val scope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -240,7 +243,7 @@ fun SettingsScreen(
                         )
                     }
                     SettingsRow(
-                        icon = Icons.Default.DataObject,
+                        icon = Icons.Default.Description,
                         title = "Export Data (JSON)",
                         subtitle = "Full backup with images",
                         onClick = onExportJSON
@@ -534,7 +537,7 @@ private fun AppearanceItem(
 
             items(availableColors, key = { it }) { hex ->
                 val cardPrimary = try {
-                    Color(AndroidColor.parseColor(hex))
+                    Color(hex.toColorInt())
                 } catch (e: Exception) { Color(0xFF0A84FF) }
                 
                 ThemePreviewCard(

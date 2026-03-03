@@ -30,9 +30,9 @@ fun ReminderSelector(
     selectedReminder: ReminderDays?,
     customDays: Int?,
     onReminderSelected: (ReminderDays?, Int?) -> Unit,
+    modifier: Modifier = Modifier,
     maxDays: Int = 15,
-    enabled: Boolean = true,
-    modifier: Modifier = Modifier
+    enabled: Boolean = true
 ) {
     Column(modifier = modifier) {
         Row(

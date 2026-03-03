@@ -1,0 +1,142 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Package Tree" id="tree">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="root" value="com.receiptwarranty.app" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=16;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="480" y="20" width="240" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="data" value="data/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="180" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="viewmodel" value="viewmodel/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="510" y="90" width="180" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" value="ui/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="780" y="90" width="180" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="workers" value="workers/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1000" y="90" width="180" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="util" value="util/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1000" y="150" width="180" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="root_data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="root" target="data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="root_vm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656" edge="1" parent="1" source="root" target="viewmodel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="root_ui" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="root" target="ui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="root_workers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6" edge="1" parent="1" source="root" target="workers">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="root_util" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="root" target="util">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data_auth" value="auth/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="60" y="150" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="data_remote" value="remote/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="180" y="150" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="data_sync" value="sync/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="60" y="200" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="data_files" value="ReceiptWarranty&#xa;DeletedItem&#xa;AppDatabase&#xa;AppContainer&#xa;ReceiptWarrantyDao&#xa;ReceiptWarrantyRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="180" y="200" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="data_auth_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data" target="data_auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data_remote_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data" target="data_remote">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data_sync_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data" target="data_sync">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="data_files_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data" target="data_files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vm_files" value="ReceiptWarrantyViewModel&#xa;AuthViewModel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="510" y="150" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vm_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d6b656" edge="1" parent="1" source="viewmodel" target="vm_files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_screens" value="screens/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="150" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_components" value="components/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="900" y="150" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_theme" value="theme/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="200" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_nav" value="NavHost" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="900" y="200" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_screens_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="ui" target="ui_screens">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_components_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="ui" target="ui_components">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_theme_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="ui" target="ui_theme">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_nav_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="ui" target="ui_nav">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="screens_list" value="HomeScreen&#xa;DashboardScreen&#xa;SettingsScreen&#xa;AddEditScreen&#xa;DetailScreen&#xa;LoginScreen" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="780" y="250" width="140" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="components_list" value="ItemCard&#xa;CategorySelector&#xa;ReminderSelector&#xa;TypeSelectionSheet&#xa;DatePicker&#xa;DashboardComponents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="920" y="250" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="screens_list_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="ui_screens" target="screens_list">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="components_list_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#b85450" edge="1" parent="1" source="ui_components" target="components_list">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="workers_files" value="WarrantyReminderWorker&#xa;WarrantyReminderScheduler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="1000" y="150" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="workers_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9673a6" edge="1" parent="1" source="workers" target="workers_files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="util_files" value="ImageFileManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="1000" y="210" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="util_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#666666" edge="1" parent="1" source="util" target="util_files">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="app_files" value="MainActivity&#xa;ReceiptWarrantyApp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="280" y="330" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="data_auth_detail" value="GoogleAuthManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="250" width="120" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="data_remote_detail" value="FirestoreRepository&#xa;DriveStorageManager&#xa;FirestoreModels" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="180" y="310" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="data_sync_detail" value="SyncManager&#xa;SyncStateManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=10" vertex="1" parent="1">
+          <mxGeometry x="60" y="310" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="auth_detail_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data_auth" target="data_auth_detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="remote_detail_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data_remote" target="data_remote_detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sync_detail_child" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#82b366" edge="1" parent="1" source="data_sync" target="data_sync_detail">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

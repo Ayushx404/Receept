@@ -1,0 +1,124 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Data Flow Diagram" id="dfd">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="ReceiptWarranty App - Data Flow Diagram (Level 1)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="500" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="App" value="Android App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=16;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="240" y="80" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Firebase" value="Firebase&#xa;(Auth/Firestore)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="620" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Drive" value="Google&#xa;Drive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="620" y="180" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" value="1. Login" style="endArrow=classic;html=1;rounded=0;strokeColor=#6c8ebf" edge="1" parent="1" source="User" target="App">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" value="2. Auth" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;dashed=1" edge="1" parent="1" source="App" target="Firebase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="processes" value="PROCESSES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="280" y="160" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="AddEditProcess" value="Add/Edit&#xa;Receipt/Warranty" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="200" y="200" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewProcess" value="View/Filter&#xa;Items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="380" y="200" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="DeleteProcess" value="Delete&#xa;Item" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="560" y="200" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SyncProcess" value="Cloud Sync&#xa;(Full/Item)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="200" y="300" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ReminderProcess" value="Schedule&#xa;Reminder" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="380" y="300" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ExportProcess" value="Export&#xa;CSV" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="560" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" value="3a. Input data" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="User" target="AddEditProcess">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" value="3b. View items" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="ViewProcess" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" value="4a. Delete request" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="User" target="DeleteProcess">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="datastores" value="DATA STORES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="840" y="80" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="RoomDB" value="Room DB&#xa;(Local)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="840" y="120" width="100" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="FirestoreDB" value="Firestore&#xa;(Cloud)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="840" y="220" width="100" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="DriveStorage" value="Drive&#xa;(Images)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="840" y="320" width="100" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" value="5a. Save to DB" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;dashed=1" edge="1" parent="1" source="AddEditProcess" target="RoomDB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" value="5b. Query items" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;dashed=1" edge="1" parent="1" source="RoomDB" target="ViewProcess">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" value="6. Remove from DB" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;dashed=1" edge="1" parent="1" source="DeleteProcess" target="RoomDB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge9" value="7a. Upload image" style="endArrow=classic;html=1;rounded=0;strokeColor=#d6b656;dashed=1" edge="1" parent="1" source="AddEditProcess" target="DriveStorage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge10" value="7b. Upload to cloud" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;dashed=1" edge="1" parent="1" source="AddEditProcess" target="FirestoreDB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge11" value="8a. Delete from cloud" style="endArrow=classic;html=1;rounded=0;strokeColor=#b85450;dashed=1" edge="1" parent="1" source="DeleteProcess" target="FirestoreDB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge12" value="8b. Delete from Drive" style="endArrow=classic;html=1;rounded=0;strokeColor=#d6b656;dashed=1" edge="1" parent="1" source="DeleteProcess" target="DriveStorage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge13" value="9a. Sync up/down" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="SyncProcess" target="FirestoreDB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge14" value="9b. Merge data" style="endArrow=classic;html=1;rounded=0;strokeColor=#82b366;dashed=1" edge="1" parent="1" source="SyncProcess" target="RoomDB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge15" value="9c. Upload/Download" style="endArrow=classic;html=1;rounded=0;strokeColor=#d6b656;dashed=1" edge="1" parent="1" source="SyncProcess" target="DriveStorage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge16" value="10. Schedule" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="ReminderProcess" target="WorkManager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WorkManager" value="WorkManager&#xa;(Notifications)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="380" y="380" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge17" value="11. Trigger" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="WorkManager" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge18" value="12. Export" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6" edge="1" parent="1" source="ExportProcess" target="User">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="DFD Level 1 Legend:&#xa;□ External Entity (User)&#xa;○ Process&#xa;⧈ Data Store" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="40" y="450" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_desc" value="DATA FLOW DESCRIPTIONS" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="flows" value="1. User signs in via Google&#xa;2. App authenticates with Firebase Auth&#xa;3a. User adds/edits receipt or warranty&#xa;3b. User views/ filters items list&#xa;4. User requests to delete item&#xa;5a. Save item to local Room DB&#xa;5b. Query items from Room DB&#xa;6. Delete from Room DB&#xa;7a. Upload image to Google Drive&#xa;7b. Upload item data to Firestore&#xa;8a. Delete from Firestore&#xa;8b. Delete image from Drive&#xa;9a. Full sync with Firestore&#xa;9b. Merge cloud/local data (timestamp-based)&#xa;9c. Upload/download images to Drive&#xa;10. Schedule WorkManager reminder&#xa;11. Notification triggered to user&#xa;12. Export data to CSV file" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=9" vertex="1" parent="1">
+          <mxGeometry x="40" y="550" width="240" height="300" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

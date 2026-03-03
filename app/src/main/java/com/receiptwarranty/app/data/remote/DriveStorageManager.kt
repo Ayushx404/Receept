@@ -7,7 +7,9 @@ import android.util.Log
 import com.google.android.gms.auth.GoogleAuthUtil
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import androidx.core.content.edit
+import androidx.core.net.toUri
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.ByteArrayContent
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
@@ -74,7 +76,8 @@ class DriveStorageManager @Inject constructor(
                 return null
             }
             
-            val credential = GoogleCredential().setAccessToken(accessToken)
+            val credential = GoogleAccountCredential.usingOAuth2(context, listOf(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_APPDATA))
+            credential.selectedAccount = account.account
             
             driveService = Drive.Builder(
                 NetHttpTransport(),
@@ -178,7 +181,7 @@ class DriveStorageManager @Inject constructor(
                 return@withContext Result.failure(Exception("Failed to access Google Drive folder"))
             }
             
-            val uri = Uri.parse(localUri)
+            val uri = localUri.toUri()
             
             val inputStream = try {
                 context.contentResolver.openInputStream(uri)
@@ -303,7 +306,7 @@ class DriveStorageManager @Inject constructor(
     private fun saveFileIdMapping(fileId: String, fileName: String) {
         try {
             val prefs = context.getSharedPreferences(PreferenceKeys.DRIVE_FILE_MAPPING, Context.MODE_PRIVATE)
-            prefs.edit().putString(fileName, fileId).apply()
+            prefs.edit { putString(fileName, fileId) }
         } catch (e: Exception) {
             Log.w(TAG, "Could not save file mapping: ${e.message}")
         }
@@ -312,10 +315,18 @@ class DriveStorageManager @Inject constructor(
     private fun removeFileIdMapping(fileId: String) {
         try {
             val prefs = context.getSharedPreferences(PreferenceKeys.DRIVE_FILE_MAPPING, Context.MODE_PRIVATE)
-            val editor = prefs.edit()
-            // We don't have filename here, so we'd need to search
-            // For now, just clear all (not ideal but functional)
-            editor.clear().apply()
+            prefs.edit {
+                // Find the filename associated with this fileId and remove it
+                val entryToRemove = prefs.all.entries.firstOrNull { it.value == fileId }
+                if (entryToRemove != null) {
+                    remove(entryToRemove.key)
+                } else {
+                    // If not found, it might be a legacy entry or already removed.
+                    // For now, if we can't find a specific mapping, clear all as a fallback
+                    // (this is the original "not ideal but functional" behavior)
+                    clear()
+                }
+            }
         } catch (e: Exception) {
             Log.w(TAG, "Could not remove file mapping: ${e.message}")
         }

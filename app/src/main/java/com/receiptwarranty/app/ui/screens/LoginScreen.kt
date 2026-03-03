@@ -164,17 +164,17 @@ fun LoginScreen(
             // Top Section: Branding & Whitespace
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally, 
-                modifier = Modifier.padding(top = 80.dp)
+                modifier = Modifier.padding(top = 100.dp)
             ) {
                 // Removed Surface/Box, using just the Icon
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_letter_v),
+                    painter = painterResource(id = R.mipmap.ic_launcher_adaptive_fore),
                     contentDescription = null,
                     tint = if (isDark) Color.White else Color.Unspecified,
-                    modifier = Modifier.size(72.dp)
+                    modifier = Modifier.size(120.dp)
                 )
                 
-                Spacer(Modifier.height(Spacing.xxl))
+                Spacer(Modifier.height(Spacing.lg))
                 
                 Text(
                     "Vault",
