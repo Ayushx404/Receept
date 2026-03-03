@@ -4,25 +4,42 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
+import com.receiptwarranty.app.data.ReceiptType
 import com.receiptwarranty.app.data.ReceiptWarranty
 import com.receiptwarranty.app.data.ReceiptWarrantyDao
 import com.receiptwarranty.app.data.ReceiptWarrantyRepository
 import com.receiptwarranty.app.data.remote.DriveStorageManager
 import com.receiptwarranty.app.data.remote.DriveUploadResult
 import com.receiptwarranty.app.data.remote.FirestoreRepository
+import com.receiptwarranty.app.data.auth.GoogleAuthManager
+import com.receiptwarranty.app.util.PreferenceKeys
+import com.receiptwarranty.app.workers.WarrantyReminderScheduler
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class SyncStateManager(
-    private val context: Context,
+@Singleton
+class SyncStateManager @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val dao: ReceiptWarrantyDao,
     private val repository: ReceiptWarrantyRepository,
     private val firestoreRepository: FirestoreRepository,
-    private val userId: String,
-    private val driveStorageManager: DriveStorageManager? = null
+    private val authManager: GoogleAuthManager,
+    private val driveStorageManager: DriveStorageManager,
+    private val reminderScheduler: WarrantyReminderScheduler
 ) {
     private val TAG = "SyncStateManager"
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    
+    private val userId: String
+        get() = authManager.getCurrentUser()?.uid ?: "local"
     
     private val _syncStatus = MutableStateFlow<SyncStatus>(SyncStatus.Idle)
     val syncStatus: StateFlow<SyncStatus> = _syncStatus
@@ -47,10 +64,13 @@ class SyncStateManager(
 
         var uploadedCount = 0
         var downloadedCount = 0
-        var uploadErrors = mutableListOf<String>()
-        var downloadErrors = mutableListOf<String>()
+        val uploadErrors = mutableListOf<String>()
+        val downloadErrors = mutableListOf<String>()
 
         try {
+            val prefs = context.getSharedPreferences(PreferenceKeys.SYNC_PREFS, Context.MODE_PRIVATE)
+            val lastSyncTime = prefs.getLong(PreferenceKeys.LAST_SUCCESSFUL_SYNC, 0L)
+            
             val localItems = dao.getAll().first()
             for (item in localItems) {
                 try {
@@ -59,17 +79,18 @@ class SyncStateManager(
                     
                     if (!item.imageUri.isNullOrEmpty() && 
                         !item.imageUri.startsWith("http") && 
-                        !item.imageUri.startsWith("https")) {
+                        !item.imageUri.startsWith("https") &&
+                        item.driveFileId.isNullOrEmpty()) {
                         
-                        val uploadResult = driveStorageManager?.uploadImage(item.imageUri)
-                        if (uploadResult != null && uploadResult.isSuccess) {
+                        val uploadResult = driveStorageManager.uploadImage(item.imageUri, item.id)
+                        if (uploadResult.isSuccess) {
                             val driveResult = uploadResult.getOrNull()
                             if (driveResult != null) {
                                 // Use downloadLink for image loading, webViewLink as fallback
                                 imageUrlToSave = driveResult.downloadLink ?: driveResult.webViewLink
                                 driveFileIdToSave = driveResult.fileId
                             }
-                        } else if (uploadResult != null && uploadResult.isFailure) {
+                        } else if (uploadResult.isFailure) {
                             uploadErrors.add("${item.title}: Image upload failed")
                         }
                     }
@@ -81,6 +102,13 @@ class SyncStateManager(
                     val result = firestoreRepository.uploadItem(itemToUpload)
                     if (result.isSuccess) {
                         uploadedCount++
+                        val newCloudId = result.getOrNull()
+                        if (newCloudId != null) {
+                            // Update ONLY the sync identifiers locally, leaving the local imageUri (content://) intact
+                            val savedItem = item.copy(cloudId = newCloudId, driveFileId = driveFileIdToSave)
+                            dao.update(savedItem)
+                            Log.d(TAG, "Updated local DB with new cloudId: $newCloudId and driveFileId: $driveFileIdToSave for item: ${item.title}")
+                        }
                     } else {
                         uploadErrors.add("${item.title}: ${result.exceptionOrNull()?.message}")
                     }
@@ -89,7 +117,7 @@ class SyncStateManager(
                 }
             }
 
-            val downloadResult = firestoreRepository.downloadAllItems()
+            val downloadResult = firestoreRepository.downloadItemsSince(lastSyncTime)
             if (downloadResult.isSuccess) {
                 val cloudItems: List<ReceiptWarranty> = downloadResult.getOrNull() ?: emptyList()
                 
@@ -111,7 +139,7 @@ class SyncStateManager(
                             (cloudItem.imageUri.contains("drive.google.com") || !cloudItem.driveFileId.isNullOrEmpty())) {
                             
                             val fileIdToDownload = cloudItem.driveFileId ?: extractFileIdFromDriveUrl(cloudItem.imageUri)
-                            if (fileIdToDownload != null && driveStorageManager != null) {
+                            if (fileIdToDownload != null) {
                                 val fileName = "receipt_${cloudItem.id}_${System.currentTimeMillis()}.jpg"
                                 val downloadResultLocal = driveStorageManager.downloadImage(fileIdToDownload, fileName)
                                 if (downloadResultLocal.isSuccess) {
@@ -125,7 +153,7 @@ class SyncStateManager(
                         
                         val existing = dao.findByUniqueFields(
                             cloudItem.title,
-                            cloudItem.company,
+                            cloudItem.category,
                             cloudItem.purchaseDate
                         )
                         if (existing != null) {
@@ -144,6 +172,9 @@ class SyncStateManager(
                                     cloudId = cloudIdToUse
                                 )
                                 dao.update(updatedItem)
+                                if (updatedItem.type == ReceiptType.WARRANTY) {
+                                    reminderScheduler.scheduleReminder(updatedItem)
+                                }
                                 downloadedCount++
                             } else {
                                 // Local version is newer or same - keep local, but update cloudId if missing
@@ -157,6 +188,9 @@ class SyncStateManager(
                             // New item from cloud - insert with cloudId
                             val itemWithLocalImage = cloudItem.copy(imageUri = finalImageUri)
                             dao.insert(itemWithLocalImage)
+                            if (itemWithLocalImage.type == ReceiptType.WARRANTY) {
+                                reminderScheduler.scheduleReminder(itemWithLocalImage)
+                            }
                             downloadedCount++
                         }
                     } catch (e: Exception) {
@@ -165,7 +199,9 @@ class SyncStateManager(
                 }
             }
 
-            _lastSyncTime.value = System.currentTimeMillis()
+            val currentSyncTime = System.currentTimeMillis()
+            prefs.edit().putLong(PreferenceKeys.LAST_SUCCESSFUL_SYNC, currentSyncTime).apply()
+            _lastSyncTime.value = currentSyncTime
             
             // Clean up old deleted items (older than 30 days)
             try {
@@ -203,6 +239,16 @@ class SyncStateManager(
         _syncStatus.value = SyncStatus.Idle
     }
 
+    fun syncItemAsync(item: ReceiptWarranty) {
+        applicationScope.launch {
+            try {
+                syncItem(item)
+            } catch (e: Exception) {
+                Log.e(TAG, "Async sync failed for item: ${item.title}", e)
+            }
+        }
+    }
+
     suspend fun syncItem(item: ReceiptWarranty): Result<String> {
         Log.d(TAG, "syncItem called for: ${item.title}, imageUri: ${item.imageUri}")
         
@@ -211,20 +257,17 @@ class SyncStateManager(
             return Result.failure(Exception("No internet connection"))
         }
 
-        if (driveStorageManager == null) {
-            Log.w(TAG, "driveStorageManager is null!")
-        } else {
-            Log.d(TAG, "driveStorageManager is available")
-        }
-
         try {
             var imageUrlToSave = item.imageUri
             var driveFileIdToSave = item.driveFileId
             
-            if (!item.imageUri.isNullOrEmpty() && !item.imageUri.startsWith("http") && !item.imageUri.startsWith("https")) {
+            if (!item.imageUri.isNullOrEmpty() && 
+                !item.imageUri.startsWith("http") && 
+                !item.imageUri.startsWith("https") &&
+                item.driveFileId.isNullOrEmpty()) {
                 Log.d(TAG, "Uploading local image to Google Drive: ${item.imageUri}")
-                val uploadResult = driveStorageManager?.uploadImage(item.imageUri)
-                if (uploadResult != null && uploadResult.isSuccess) {
+                val uploadResult = driveStorageManager.uploadImage(item.imageUri, item.id)
+                if (uploadResult.isSuccess) {
                     val driveResult = uploadResult.getOrNull()
                     if (driveResult != null) {
                         // Use downloadLink for image loading, webViewLink as fallback
@@ -232,7 +275,7 @@ class SyncStateManager(
                         driveFileIdToSave = driveResult.fileId
                         Log.d(TAG, "Image uploaded to Drive, URL: $imageUrlToSave, File ID: $driveFileIdToSave")
                     }
-                } else if (uploadResult != null && uploadResult.isFailure) {
+                } else if (uploadResult.isFailure) {
                     Log.e(TAG, "Image upload failed: ${uploadResult.exceptionOrNull()?.message}")
                     return Result.failure(uploadResult.exceptionOrNull() ?: Exception("Image upload failed"))
                 }
@@ -246,6 +289,17 @@ class SyncStateManager(
             )
             val result = firestoreRepository.uploadItem(itemToUpload)
             Log.d(TAG, "Firestore upload result: ${result.isSuccess}")
+            
+            if (result.isSuccess) {
+                val newCloudId = result.getOrNull()
+                if (newCloudId != null) {
+                    // Update ONLY the sync identifiers locally, leaving the local imageUri (content://) intact
+                    val savedItem = item.copy(cloudId = newCloudId, driveFileId = driveFileIdToSave)
+                    dao.update(savedItem)
+                    Log.d(TAG, "Updated local DB with new cloudId: $newCloudId and driveFileId: $driveFileIdToSave for item: ${item.title}")
+                }
+            }
+            
             return result
         } catch (e: Exception) {
             Log.e(TAG, "syncItem failed: ${e.message}", e)
@@ -286,7 +340,7 @@ class SyncStateManager(
             }
             
             // 2. Delete image from Google Drive
-            if (!item.driveFileId.isNullOrEmpty() && driveStorageManager != null) {
+            if (!item.driveFileId.isNullOrEmpty()) {
                 val driveDeleteResult = driveStorageManager.deleteImage(item.driveFileId)
                 if (driveDeleteResult.isFailure) {
                     Log.e(TAG, "Failed to delete from Drive: ${driveDeleteResult.exceptionOrNull()?.message}")

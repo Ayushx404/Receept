@@ -12,10 +12,16 @@ class WarrantyReminderScheduler(private val context: Context) {
 
     fun scheduleReminder(item: ReceiptWarranty) {
         val expiry = item.warrantyExpiryDate ?: return
-        val reminderDays = item.reminderDays ?: ReminderDays.ONE_WEEK
+        
+        // Use customReminderDays if CUSTOM is selected or if customReminderDays is present
+        val daysBefore = if (item.reminderDays == ReminderDays.CUSTOM) {
+            item.customReminderDays ?: 1
+        } else {
+            item.reminderDays?.days ?: 7 // Default 1 week
+        }
         
         val now = System.currentTimeMillis()
-        val reminderDaysMs = reminderDays.days * 24 * 60 * 60 * 1000L
+        val reminderDaysMs = daysBefore * 24 * 60 * 60 * 1000L
         val reminderTime = expiry - reminderDaysMs
 
         if (reminderTime <= now) return
@@ -25,7 +31,7 @@ class WarrantyReminderScheduler(private val context: Context) {
         val data = Data.Builder()
             .putString(WarrantyReminderWorker.KEY_TITLE, item.title)
             .putLong(WarrantyReminderWorker.KEY_ITEM_ID, item.id)
-            .putInt(WarrantyReminderWorker.KEY_DAYS_BEFORE, reminderDays.days)
+            .putInt(WarrantyReminderWorker.KEY_DAYS_BEFORE, daysBefore)
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<WarrantyReminderWorker>()

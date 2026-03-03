@@ -1,6 +1,8 @@
 package com.receiptwarranty.app.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -9,328 +11,238 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Dangerous
-import androidx.compose.material.icons.filled.FileDownload
-import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.receiptwarranty.app.data.ReceiptType
-import com.receiptwarranty.app.ui.components.CategoryStatRow
-import com.receiptwarranty.app.ui.components.ExpiringSoonCard
-import com.receiptwarranty.app.ui.components.StatCard
-import com.receiptwarranty.app.viewmodel.ReceiptWarrantyUiState
-import com.receiptwarranty.app.viewmodel.ReceiptWarrantyViewModel
+import com.receiptwarranty.app.data.ReceiptWarranty
+import com.receiptwarranty.app.ui.components.ActionPillButton
+import com.receiptwarranty.app.ui.components.AttentionCard
+import com.receiptwarranty.app.ui.components.CoverageGrid
+import com.receiptwarranty.app.ui.components.MonthlyOverviewCard
+import com.receiptwarranty.app.ui.components.QuickStatCard
+import com.receiptwarranty.app.ui.theme.Spacing
+import com.receiptwarranty.app.ui.theme.VaultShape
+import com.receiptwarranty.app.viewmodel.DashboardUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    uiState: ReceiptWarrantyUiState,
-    onNavigateToAdd: (ReceiptType) -> Unit,
-    onNavigateToHome: () -> Unit,
-    onNavigateToCategory: (String) -> Unit,
+    uiState: DashboardUiState,
+    currencySymbol: String,
     onNavigateToExpiringSoon: () -> Unit,
-    onNavigateToSettings: () -> Unit,
+    onNavigateToCategory: (String) -> Unit,
+    onItemClick: (ReceiptWarranty) -> Unit,
+    onAddClick: (ReceiptType) -> Unit,
     onExportCSV: () -> Unit,
-    viewModel: ReceiptWarrantyViewModel
+    onPayClick: (ReceiptWarranty) -> Unit,
+    onNavigateToTimeline: () -> Unit,
+    onNavigateToStats: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
+            LargeTopAppBar(
+                title = { 
                     Text(
-                        "Dashboard",
-                        fontWeight = FontWeight.Bold
-                    )
+                        "Overview", 
+                        fontWeight = FontWeight.ExtraBold
+                    ) 
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                },
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                ),
+                windowInsets = WindowInsets(0.dp),
+                scrollBehavior = scrollBehavior
             )
-        }
-    ) { padding ->
+        },
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+    ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(paddingValues),
+            contentPadding = PaddingValues(Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
+            // 1. Coverage Grid (4-type breakdown)
             item {
-                QuickStatsSection(uiState)
-            }
-
-            item {
-                ActionButtonsSection(
-                    onAddReceipt = { onNavigateToAdd(ReceiptType.RECEIPT) },
-                    onAddWarranty = { onNavigateToAdd(ReceiptType.WARRANTY) }
+                CoverageGrid(
+                    receiptCount = uiState.receiptCount,
+                    warrantyCount = uiState.warrantyCount,
+                    billCount = uiState.billCount,
+                    subscriptionCount = uiState.subscriptionCount
                 )
             }
 
-            if (uiState.expiringSoonItems.isNotEmpty()) {
+            // 2. Attention Card (merged expiring/due)
+            if (uiState.upcomingRenewals.isNotEmpty()) {
                 item {
-                    ExpiringSoonSection(
-                        items = uiState.expiringSoonItems,
-                        onViewAll = onNavigateToExpiringSoon,
-                        onItemClick = { }
+                    AttentionCard(
+                        items = uiState.upcomingRenewals,
+                        currencySymbol = currencySymbol,
+                        onItemClick = onItemClick,
+                        onViewAllClick = onNavigateToExpiringSoon,
+                        onPayClick = onPayClick
                     )
                 }
             }
 
+            // 3. Monthly Overview Card (subscriptions)
+            item {
+                MonthlyOverviewCard(
+                    activeSubscriptions = uiState.subscriptionCount,
+                    monthlyCost = uiState.monthlySubscriptionCost,
+                    currencySymbol = currencySymbol,
+                    onClick = onNavigateToStats
+                )
+            }
+
+            // 4. By Category
             if (uiState.categoryStats.isNotEmpty()) {
                 item {
-                    CategoriesSection(
-                        categories = uiState.categoryStats,
-                        onCategoryClick = onNavigateToCategory
-                    )
+                    Column {
+                        SectionHeader("By Category")
+                        Spacer(Modifier.height(Spacing.sm))
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = VaultShape.large,
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp, 
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                        ) {
+                            Column {
+                                uiState.categoryStats.forEachIndexed { index, stat ->
+                                    CategoryRow(
+                                        name = stat.category,
+                                        count = stat.count,
+                                        onClick = { onNavigateToCategory(stat.category) }
+                                    )
+                                    if (index < uiState.categoryStats.size - 1) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = Spacing.lg),
+                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-
-            item {
-                QuickActionsSection(
-                    onExportCSV = onExportCSV,
-                    onViewAllItems = onNavigateToHome
-                )
-            }
         }
     }
 }
 
 @Composable
-private fun QuickStatsSection(uiState: ReceiptWarrantyUiState) {
-    Column {
-        Text(
-            text = "Quick Stats",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.Receipt,
-                label = "Receipts",
-                value = uiState.receiptCount.toString(),
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.Verified,
-                label = "Warranties",
-                value = uiState.warrantyCount.toString(),
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.CheckCircle,
-                label = "Active",
-                value = uiState.activeWarrantyCount.toString(),
-                color = MaterialTheme.colorScheme.tertiary
-            )
-
-            StatCard(
-                modifier = Modifier.weight(1f),
-                icon = Icons.Default.Warning,
-                label = "Expiring",
-                value = uiState.expiringSoonCount.toString(),
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-    }
-}
-
-@Composable
-private fun ActionButtonsSection(
-    onAddReceipt: () -> Unit,
-    onAddWarranty: () -> Unit
+private fun SectionHeader(
+    title: String,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null
 ) {
-    Column {
-        Text(
-            text = "Quick Add",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FilledTonalButton(
-                onClick = onAddReceipt,
-                modifier = Modifier.weight(1f)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        if (actionLabel != null && onAction != null) {
+            TextButton(
+                onClick = onAction,
+                contentPadding = PaddingValues(0.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Receipt")
-            }
-
-            FilledTonalButton(
-                onClick = onAddWarranty,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Default.Verified, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Warranty")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(actionLabel, style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.width(Spacing.xs))
+                    Icon(Icons.Default.ChevronRight, contentDescription = null, modifier = Modifier.size(16.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ExpiringSoonSection(
-    items: List<com.receiptwarranty.app.data.ReceiptWarranty>,
-    onViewAll: () -> Unit,
-    onItemClick: (com.receiptwarranty.app.data.ReceiptWarranty) -> Unit
+private fun CategoryRow(
+    name: String,
+    count: Int,
+    onClick: () -> Unit
 ) {
-    Column {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.Transparent
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.lg, vertical = Spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .padding(2.dp)
+                        .background(MaterialTheme.colorScheme.primary, VaultShape.pill)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(Modifier.width(Spacing.md))
+                Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Expiring Soon",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    "$count ${if (count == 1) "item" else "items"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-
-            TextButton(onClick = onViewAll) {
-                Text("View All")
+                Spacer(Modifier.width(Spacing.sm))
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
+                    Icons.Default.ChevronRight, 
+                    contentDescription = null, 
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        items.take(3).forEach { item ->
-            ExpiringSoonCard(
-                item = item,
-                onClick = { onItemClick(item) },
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun CategoriesSection(
-    categories: List<com.receiptwarranty.app.data.CategoryCount>,
-    onCategoryClick: (String) -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "By Category",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            categories.take(5).forEach { categoryCount ->
-                CategoryStatRow(
-                    categoryCount = categoryCount,
-                    onClick = { onCategoryClick(categoryCount.category) }
-                )
-            }
-
-            if (categories.size > 5) {
-                TextButton(
-                    onClick = { },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("View All Categories")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun QuickActionsSection(
-    onExportCSV: () -> Unit,
-    onViewAllItems: () -> Unit
-) {
-    Column {
-        Text(
-            text = "Quick Actions",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FilledTonalButton(
-                onClick = onExportCSV,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Default.FileDownload, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Export CSV")
-            }
-
-            FilledTonalButton(
-                onClick = onViewAllItems,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Default.Receipt, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("View All")
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.receiptwarranty.app
 
 import android.Manifest
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,118 +15,111 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.activity.viewModels
 import com.receiptwarranty.app.ui.ReceiptWarrantyNavHost
-import com.receiptwarranty.app.ui.screens.LoginScreen
 import com.receiptwarranty.app.ui.theme.ReceiptWarrantyTheme
 import com.receiptwarranty.app.viewmodel.AuthState
+import com.receiptwarranty.app.ui.screens.LoginScreen
 import com.receiptwarranty.app.viewmodel.AuthViewModel
+import androidx.core.content.edit
+import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
+import javax.inject.Inject
+import com.receiptwarranty.app.data.AppearancePreferences
 
+private object PreferenceKeys {
+    const val APP_PREFS = "app_prefs"
+    const val IS_LOCAL_MODE = "is_local_mode"
+}
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var appearancePreferences: AppearancePreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize auth manager
-        (application as ReceiptWarrantyApp).container.initializeAuth(this)
-
         enableEdgeToEdge()
         setContent {
-            val container = (application as ReceiptWarrantyApp).container
-            val authManager = container.googleAuthManager
+            val prefs = getSharedPreferences(PreferenceKeys.APP_PREFS, Context.MODE_PRIVATE)
+            var isLocalMode by remember { mutableStateOf(prefs.getBoolean(PreferenceKeys.IS_LOCAL_MODE, false)) }
 
-            if (authManager != null) {
-                val authViewModel: AuthViewModel = viewModel(
-                    factory = AuthViewModel.Factory(authManager)
-                )
+            val authViewModel: AuthViewModel = hiltViewModel()
+            val authState by authViewModel.authState.collectAsStateWithLifecycle()
+            val isSigningIn by authViewModel.isSigningIn.collectAsStateWithLifecycle()
 
-                val authState by authViewModel.authState.collectAsState()
-                val isSigningIn by authViewModel.isSigningIn.collectAsState()
+            // collect appearance settings
+            val appearanceSettings by appearancePreferences.settings.collectAsStateWithLifecycle()
 
-                // Create launcher for Google Sign-In
-                val signInLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartActivityForResult()
-                ) { result ->
-                    authViewModel.handleSignInResult(result.data)
-                }
+            // Create launcher for Google Sign-In
+            val signInLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                authViewModel.handleSignInResult(result.data)
+            }
 
-                ReceiptWarrantyTheme {
+                ReceiptWarrantyTheme(
+                    themeMode = appearanceSettings.themeMode,
+                    primaryColor = appearanceSettings.primaryColorHex,
+                    useDynamicColor = appearanceSettings.useDynamicColor,
+                    useAmoledBlack = appearanceSettings.useAmoledBlack
+                ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        when (val state = authState) {
-                            is AuthState.Loading -> {
-                                LoginScreen(
-                                    onSignInClick = {
-                                        val intent = authViewModel.getSignInIntent()
-                                        signInLauncher.launch(intent)
-                                    },
-                                    isLoading = isSigningIn
+                        if (isLocalMode) {
+                            PermissionHandler {
+                                ReceiptWarrantyNavHost(
+                                    userId = "local",
+                                    userEmail = "",
+                                    onSignOut = {
+                                        isLocalMode = false
+                                        prefs.edit { putBoolean(PreferenceKeys.IS_LOCAL_MODE, false) }
+                                    }
                                 )
                             }
-                            is AuthState.Unauthenticated -> {
-                                LoginScreen(
-                                    onSignInClick = {
-                                        val intent = authViewModel.getSignInIntent()
-                                        signInLauncher.launch(intent)
-                                    },
-                                    isLoading = isSigningIn,
-                                    errorMessage = null
-                                )
-                            }
-                            is AuthState.Authenticated -> {
-                                // Initialize Firestore with user ID
-                                container.initializeFirestore(state.user.uid)
-                                
-                                PermissionHandler {
-                                    ReceiptWarrantyNavHost(
-                                        userId = state.user.uid,
-                                        userEmail = state.user.email ?: "",
-                                        onSignOut = { 
-                                            container.firestoreRepository = null
-                                            container.syncManager = null
-                                            container.currentUserId = null
-                                            authViewModel.signOut() 
-                                        }
+                        } else {
+                            when (val state = authState) {
+                                is AuthState.Authenticated -> {
+                                    PermissionHandler {
+                                        ReceiptWarrantyNavHost(
+                                            userId = state.user.uid,
+                                            userEmail = state.user.email ?: "",
+                                            userName = state.user.displayName,
+                                            userProfilePicture = state.user.photoUrl?.toString(),
+                                            onSignOut = { 
+                                                authViewModel.signOut()
+                                                isLocalMode = false
+                                                prefs.edit { putBoolean(PreferenceKeys.IS_LOCAL_MODE, false) }
+                                            }
+                                        )
+                                    }
+                                }
+                                else -> {
+                                    LoginScreen(
+                                        onSignInClick = {
+                                            signInLauncher.launch(authViewModel.getSignInIntent())
+                                        },
+                                        onSkipLogin = {
+                                            isLocalMode = true
+                                            prefs.edit { putBoolean(PreferenceKeys.IS_LOCAL_MODE, true) }
+                                        },
+                                        isLoading = isSigningIn,
+                                        errorMessage = (state as? AuthState.Error)?.message
                                     )
                                 }
                             }
-                            is AuthState.Error -> {
-                                LoginScreen(
-                                    onSignInClick = {
-                                        val intent = authViewModel.getSignInIntent()
-                                        signInLauncher.launch(intent)
-                                    },
-                                    isLoading = isSigningIn,
-                                    errorMessage = state.message
-                                )
-                            }
                         }
                     }
                 }
-            } else {
-                // Fallback if auth not initialized
-                ReceiptWarrantyTheme {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        PermissionHandler {
-                            ReceiptWarrantyNavHost(
-                                userId = "local",
-                                userEmail = "",
-                                onSignOut = {}
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -137,14 +131,23 @@ private fun PermissionHandler(content: @Composable () -> Unit) {
     ) { }
 
     LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            launcher.launch(
+        val permissions = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                 arrayOf(
                     Manifest.permission.POST_NOTIFICATIONS,
                     Manifest.permission.READ_MEDIA_IMAGES
                 )
-            )
+            }
+            else -> {
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+        if (permissions.isNotEmpty()) {
+            launcher.launch(permissions)
         }
     }
     content()
 }
+
+
+

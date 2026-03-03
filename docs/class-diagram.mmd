@@ -1,0 +1,210 @@
+```mermaid
+classDiagram
+    %% Room Entities
+    class ReceiptWarranty {
+        -id: Long
+        -type: ReceiptType
+        -title: String
+        -company: String
+        -category: String?
+        -imageUri: String?
+        -driveFileId: String?
+        -cloudId: String?
+        -purchaseDate: Long?
+        -warrantyExpiryDate: Long?
+        -reminderDays: ReminderDays?
+        -notes: String?
+        -createdAt: Long
+        -updatedAt: Long
+        +warrantyStatus(): WarrantyStatus
+    }
+    
+    class DeletedItem {
+        -cloudId: String
+        -userId: String
+        -deletedAt: Long
+    }
+    
+    %% DAO
+    class ReceiptWarrantyDao {
+        +getAll(): Flow~List~ReceiptWarranty~~
+        +getById(id): Flow~ReceiptWarranty?~
+        +getAllCategories(): Flow~List~String~~
+        +getCategoryStats(): Flow~List~CategoryCount~~
+        +getReceiptCount(): Flow~Int~
+        +getWarrantyCount(): Flow~Int~
+        +getActiveWarrantyCount(): Flow~Int~
+        +getExpiringSoonCount(): Flow~Int~
+        +getExpiredWarrantyCount(): Flow~Int~
+        +getExpiringSoonItems(): Flow~List~ReceiptWarranty~~
+        +getItemsWithReminders(): Flow~List~ReceiptWarranty~~
+        +getAllItemsForExport(): List~ReceiptWarranty~
+        +insert(item): Long
+        +update(item)
+        +delete(item)
+        +deleteById(id)
+        +findByUniqueFields(title, company, purchaseDate): ReceiptWarranty?
+        +insertDeletedItem(deletedItem)
+        +findDeletedItem(cloudId, userId): DeletedItem?
+        +getAllDeletedCloudIds(userId): List~String~
+    }
+    
+    %% Repository
+    class ReceiptWarrantyRepository {
+        -dao: ReceiptWarrantyDao
+        -userId: String
+        +getAll(): Flow~List~ReceiptWarranty~~
+        +getById(id): Flow~ReceiptWarranty?~
+        +getAllCategories(): Flow~List~String~~
+        +getAllCompanies(): Flow~List~String~~
+        +getCategoryStats(): Flow~List~CategoryCount~~
+        +getReceiptCount(): Flow~Int~
+        +getWarrantyCount(): Flow~Int~
+        +getActiveWarrantyCount(): Flow~Int~
+        +getExpiringSoonCount(): Flow~Int~
+        +getExpiredWarrantyCount(): Flow~Int~
+        +getExpiringSoonItems(): Flow~List~ReceiptWarranty~~
+        +getItemsWithReminders(): Flow~List~ReceiptWarranty~~
+        +insert(item): Long
+        +update(item)
+        +delete(item)
+        +deleteById(id)
+        +exportToCSV(): String
+        +getAllDeletedCloudIds(userId): List~String~
+        +trackDeletion(cloudId, userId)
+        +cleanOldDeletedItems(userId, timestamp)
+    }
+    
+    %% ViewModel
+    class ReceiptWarrantyViewModel {
+        -repository: ReceiptWarrantyRepository
+        -warrantyReminderScheduler: WarrantyReminderScheduler
+        -syncStateManager: SyncStateManager?
+        -searchQuery: StateFlow~String~
+        -warrantyFilter: StateFlow~WarrantyFilter~
+        -categoryFilter: StateFlow~String?~
+        +uiState: StateFlow~ReceiptWarrantyUiState~
+        +items: StateFlow~List~ReceiptWarranty~~
+        +filteredItems: StateFlow~List~ReceiptWarranty~~
+        +categories: StateFlow~List~String~~
+        +receiptCount: StateFlow~Int~
+        +warrantyCount: StateFlow~Int~
+        +activeWarrantyCount: StateFlow~Int~
+        +expiredWarrantyCount: StateFlow~Int~
+        +expiringSoonCount: StateFlow~Int~
+        +updateSearchQuery(query)
+        +setWarrantyFilter(filter)
+        +setCategoryFilter(category)
+        +insertOrUpdate(item)
+        +delete(item)
+        +deleteById(id)
+        +deleteMultiple(items)
+        +exportToCSV(context)
+    }
+    
+    %% Firestore
+    class FirestoreRepository {
+        -userId: String
+        -db: FirebaseFirestore
+        -userRef: DocumentReference
+        -receiptsRef: CollectionReference
+        -profileRef: CollectionReference
+        -syncRef: DocumentReference
+        +uploadItem(item): Result~String~
+        +updateItem(item): Result~Unit~
+        +deleteItem(itemId): Result~Unit~
+        +downloadAllItems(): Result~List~ReceiptWarranty~~
+        +observeItems(): Flow~List~FirestoreReceiptWarranty~~
+        +saveUserProfile(email, displayName): Result~Unit~
+        +getSyncMetadata(): FirestoreSyncMetadata
+        +clearAllData(): Result~Unit~
+    }
+    
+    class DriveStorageManager {
+        -context: Context
+        -userId: String
+        -driveService: Drive?
+        -receiptFolderId: String?
+        +uploadImage(localUri): Result~DriveUploadResult~
+        +downloadImage(fileId, localFileName): Result~String~
+        +deleteImage(fileId): Result~Unit~
+    }
+    
+    %% Sync
+    class SyncStateManager {
+        -context: Context
+        -dao: ReceiptWarrantyDao
+        -repository: ReceiptWarrantyRepository
+        -firestoreRepository: FirestoreRepository
+        -userId: String
+        -driveStorageManager: DriveStorageManager?
+        +syncStatus: StateFlow~SyncStatus~
+        +lastSyncTime: StateFlow~Long~
+        +isOnline(): Boolean
+        +syncAll(): Result~Pair~Int, Int~~
+        +syncItem(item): Result~String~
+        +deleteItem(item): Result~Unit~
+    }
+    
+    %% Scheduling
+    class WarrantyReminderScheduler {
+        -context: Context
+        +scheduleReminder(item)
+        +cancelReminder(id)
+    }
+    
+    class WarrantyReminderWorker {
+        -context: Context
+        +doWork(): Result
+    }
+    
+    %% Auth
+    class GoogleAuthManager {
+        -context: Context
+        +getSignInIntent(): Intent
+        +handleSignInResult(data): Result~FirebaseUser~
+        +signOut()
+        +getCurrentUser(): FirebaseUser?
+    }
+    
+    %% App Container
+    class AppContainer {
+        -context: Context
+        -userId: String
+        +database: AppDatabase
+        +dao: ReceiptWarrantyDao
+        +repository: ReceiptWarrantyRepository
+        +syncStateManager: SyncStateManager?
+        +warrantyReminderScheduler: WarrantyReminderScheduler
+        +initializeAuth(activity)
+        +initializeFirestore(userId)
+    }
+    
+    %% Relationships
+    ReceiptWarrantyRepository --> ReceiptWarrantyDao : uses
+    ReceiptWarrantyViewModel --> ReceiptWarrantyRepository : uses
+    ReceiptWarrantyViewModel --> SyncStateManager : uses
+    ReceiptWarrantyViewModel --> WarrantyReminderScheduler : uses
+    SyncStateManager --> FirestoreRepository : uses
+    SyncStateManager --> DriveStorageManager : uses
+    SyncStateManager --> ReceiptWarrantyRepository : uses
+    AppContainer --> ReceiptWarrantyRepository : creates
+    AppContainer --> SyncStateManager : creates
+    AppContainer --> WarrantyReminderScheduler : creates
+    
+    %% Color Legend
+    class ReceiptWarranty
+    class DeletedItem
+    
+    note for ReceiptWarranty "Room Entity - Blue"
+    note for DeletedItem "Room Entity - Blue"
+    note for ReceiptWarrantyDao "DAO - Green"
+    note for ReceiptWarrantyRepository "Repository - Green"
+    note for ReceiptWarrantyViewModel "ViewModel - Yellow"
+    note for FirestoreRepository "Remote - Red"
+    note for DriveStorageManager "Remote - Red"
+    note for SyncStateManager "Sync - Purple"
+    note for WarrantyReminderScheduler "Workers - Purple"
+    note for GoogleAuthManager "Auth - Orange"
+    note for AppContainer "DI - Yellow"
+```

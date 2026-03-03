@@ -1,5 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Receipt &amp; Warranty</string>
+    <string name="app_name">Vault</string>
     <string name="default_web_client_id">695792889051-lk4haeb1q5ku4ek3vpcmddeg0mj3h78c.apps.googleusercontent.com</string>
+
+    <!-- App Preferences -->
+    <string name="pref_is_local_mode">is_local_mode</string>
+    <string name="pref_sync_prefs">sync_prefs</string>
+    <string name="pref_drive_file_mapping">drive_file_mapping</string>
+    <string name="pref_last_successful_sync">last_successful_sync</string>
+    <string name="pref_has_seen_onboarding">has_seen_onboarding</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Warranty Reminders</string>
+    <string name="notification_channel_description">Reminders when warranty is about to expire</string>
+    <string name="notification_warranty_expiring_title">Warranty Expiring Soon</string>
+
+    <!-- Common -->
+    <plurals name="delete_items_title">
+        <item quantity="one">Delete 1 item?</item>
+        <item quantity="other">Delete %d items?</item>
+    </plurals>
+    <plurals name="selected_items_description">
+        <item quantity="one">1 selected item</item>
+        <item quantity="other">%d selected items</item>
+    </plurals>
+    <string name="undo">Undo</string>
+    <string name="csv_exported">CSV exported to Downloads</string>
+    <string name="export_failed">Export failed: %s</string>
+    <string name="no_search_results">No results found</string>
+    <string name="empty_vault">Your vault is empty</string>
+
+    <!-- Error Messages -->
+    <string name="error_no_internet">No internet connection</string>
+    <string name="error_sync_failed">Sync failed</string>
+    <string name="error_save_failed">Error saving: %s</string>
+    <string name="error_scanner_failed">Failed to launch scanner</string>
 </resources>

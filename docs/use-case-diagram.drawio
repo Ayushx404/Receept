@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Mozilla/5.0" version="22.1.0" type="device">
+  <diagram name="Use Case Diagram" id="usecase">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="ReceiptWarranty App - Use Case Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="450" y="20" width="500" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="60" y="200" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="System" value="System&#xa;(WorkManager)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="60" y="500" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#666666;strokeWidth=2;dashed=1" vertex="1" parent="1">
+          <mxGeometry x="160" y="80" width="1100" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="boundary_label" value="ReceiptWarranty App" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="180" y="90" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Auth" value="&lt;&lt;include&gt;&gt;&#xa;Sign In" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="240" y="140" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SignOut" value="Sign Out" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="240" y="210" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="AddReceipt" value="Add Receipt" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="420" y="140" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="AddWarranty" value="Add Warranty" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="420" y="200" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EditItem" value="Edit Item" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="420" y="260" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewItem" value="View Item&#xa;Details" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="420" y="320" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="DeleteItem" value="Delete Item" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="420" y="390" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="Search" value="Search Items" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="600" y="140" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="Filter" value="Filter Items" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="600" y="200" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewDashboard" value="View&#xa;Dashboard" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="600" y="260" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewStats" value="View&#xa;Statistics" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="600" y="330" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ManualSync" value="Manual&#xa;Sync" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="140" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="AutoSync" value="Auto Sync&#xa;(on save)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="210" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Export" value="Export to CSV" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="280" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ScheduleReminder" value="Schedule&#xa;Reminder" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="350" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="CancelReminder" value="Cancel&#xa;Reminder" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="780" y="420" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ReceiveNotif" value="Receive&#xa;Notification" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="980" y="350" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="UploadImage" value="Upload&#xa;Image" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="980" y="140" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewImage" value="View&#xa;Image" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="980" y="210" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="Auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="SignOut">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="AddReceipt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="AddWarranty">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="EditItem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="ViewItem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="DeleteItem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="Search">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge9" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="Filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge10" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="ViewDashboard">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge11" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="ViewStats">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge12" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="ManualSync">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge13" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="Export">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge14" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="ScheduleReminder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge15" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="User" target="CancelReminder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge16" value="" style="endArrow=none;html=1;rounded=0;strokeColor=#666666" edge="1" parent="1" source="System" target="ReceiveNotif">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge17" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="AddReceipt" target="UploadImage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge18" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="AddWarranty" target="UploadImage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge19" value="&lt;&lt;extend&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="ViewItem" target="ViewImage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge20" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="AddReceipt" target="Auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge21" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="AddWarranty" target="Auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge22" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="ManualSync" target="Auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge23" value="&lt;&lt;include&gt;&gt;" style="endArrow=open;endSize=12;html=1;rounded=0;strokeColor=#6c8ebf;dashed=1" edge="1" parent="1" source="Export" target="Auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge24" value="triggers" style="endArrow=classic;html=1;rounded=0;strokeColor=#9673a6;dashed=1" edge="1" parent="1" source="ScheduleReminder" target="ReceiveNotif">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" value="LEGEND" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="1140" y="100" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_items" value="Blue: Authentication&#xa;Green: CRUD Operations&#xa;Red: Browse/View&#xa;Yellow: Sync/Export&#xa;Purple: Reminders&#xa;Orange: Image Handling" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10" vertex="1" parent="1">
+          <mxGeometry x="1120" y="130" width="140" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

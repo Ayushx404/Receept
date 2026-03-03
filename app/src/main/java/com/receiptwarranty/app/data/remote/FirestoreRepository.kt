@@ -10,33 +10,38 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import com.receiptwarranty.app.data.auth.GoogleAuthManager
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class FirestoreRepository(private val userId: String) {
+@Singleton
+class FirestoreRepository @Inject constructor(
+    private val authManager: GoogleAuthManager
+) {
 
     private val TAG = "FirestoreRepository"
     
+    private val userId: String
+        get() = authManager.getCurrentUser()?.uid ?: "local"
+
     private val db = FirebaseFirestore.getInstance()
-    private val userRef = db.collection("users").document(userId)
-    private val receiptsRef = userRef.collection("receipts")
-    private val profileRef = userRef.collection("profile")
-    private val syncRef = userRef.collection("metadata").document("sync")
+    private val userRef get() = db.collection("users").document(userId)
+    private val receiptsRef get() = userRef.collection("receipts")
+    private val profileRef get() = userRef.collection("profile")
+    private val syncRef get() = userRef.collection("metadata").document("sync")
 
     suspend fun uploadItem(item: ReceiptWarranty): Result<String> {
         return try {
             Log.d(TAG, "Uploading item to Firestore: ${item.title}, imageUri: ${item.imageUri}")
             
             val firestoreItem = FirestoreReceiptWarranty.fromLocalModel(item)
-            val docRef = if (!item.cloudId.isNullOrEmpty()) {
-                // Update existing document
-                receiptsRef.document(item.cloudId)
-            } else {
-                // Create new document
-                receiptsRef.document()
-            }
+            // Use local Room ID as deterministic Firestore document ID to prevent duplicates
+            val docId = item.id.toString()
+            val docRef = receiptsRef.document(docId)
             docRef.set(firestoreItem).await()
             updateSyncMetadata()
-            Log.d(TAG, "Item uploaded successfully: ${docRef.id}")
-            Result.success(docRef.id)
+            Log.d(TAG, "Item uploaded successfully with ID: $docId")
+            Result.success(docId)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to upload item: ${e.message}", e)
             Result.failure(e)
@@ -67,9 +72,13 @@ class FirestoreRepository(private val userId: String) {
         }
     }
 
-    suspend fun downloadAllItems(): Result<List<ReceiptWarranty>> {
+    suspend fun downloadItemsSince(lastSyncTime: Long): Result<List<ReceiptWarranty>> {
         return try {
-            val snapshot = receiptsRef.orderBy("updatedAt", Query.Direction.DESCENDING).get().await()
+            val snapshot = receiptsRef
+                .whereGreaterThan("updatedAt", lastSyncTime)
+                .orderBy("updatedAt", Query.Direction.DESCENDING)
+                .get()
+                .await()
             val items = snapshot.documents.mapNotNull { doc ->
                 try {
                     val firestoreItem = doc.toObject(FirestoreReceiptWarranty::class.java)
@@ -84,21 +93,7 @@ class FirestoreRepository(private val userId: String) {
         }
     }
 
-    fun observeItems(): Flow<List<FirestoreReceiptWarranty>> = callbackFlow {
-        val listener = receiptsRef
-            .orderBy("updatedAt", Query.Direction.DESCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                val items = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(FirestoreReceiptWarranty::class.java)
-                } ?: emptyList()
-                trySend(items)
-            }
-        awaitClose { listener.remove() }
-    }
+
 
     suspend fun saveUserProfile(email: String, displayName: String?): Result<Unit> {
         return try {
@@ -133,7 +128,7 @@ class FirestoreRepository(private val userId: String) {
                 )
             ).await()
         } catch (e: Exception) {
-            // Silent fail for metadata update
+            android.util.Log.w(TAG, "Failed to update sync metadata", e)
         }
     }
 
@@ -147,6 +142,39 @@ class FirestoreRepository(private val userId: String) {
             batch.commit().await()
             Result.success(Unit)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun cleanupDuplicateDocuments(): Result<Int> {
+        return try {
+            Log.d(TAG, "Starting duplicate cleanup...")
+            val snapshot = receiptsRef.get().await()
+            
+            val documentsById = snapshot.documents.groupBy { it.id }
+            var deletedCount = 0
+            
+            for ((docId, docs) in documentsById) {
+                if (docs.size > 1) {
+                    Log.d(TAG, "Found ${docs.size} duplicates for ID: $docId")
+                    val sortedByUpdated = docs.sortedByDescending {
+                        (it.get("updatedAt") as? Long) ?: 0L
+                    }
+                    val toKeep = sortedByUpdated.first()
+                    val toDelete = sortedByUpdated.drop(1)
+                    
+                    toDelete.forEach { doc ->
+                        receiptsRef.document(doc.id).delete().await()
+                        deletedCount++
+                        Log.d(TAG, "Deleted duplicate document: ${doc.id}")
+                    }
+                }
+            }
+            
+            Log.d(TAG, "Cleanup complete. Deleted $deletedCount duplicate documents")
+            Result.success(deletedCount)
+        } catch (e: Exception) {
+            Log.e(TAG, "Cleanup failed: ${e.message}", e)
             Result.failure(e)
         }
     }

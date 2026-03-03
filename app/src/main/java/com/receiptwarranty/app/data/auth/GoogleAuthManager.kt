@@ -13,13 +13,18 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.tasks.await
 import java.lang.Exception
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class GoogleAuthManager(private val activity: Activity) {
+@Singleton
+class GoogleAuthManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private val webClientId: String by lazy {
-        activity.getString(com.receiptwarranty.app.R.string.default_web_client_id)
+        context.getString(com.receiptwarranty.app.R.string.default_web_client_id)
     }
 
     private val gso: GoogleSignInOptions by lazy {
@@ -36,7 +41,7 @@ class GoogleAuthManager(private val activity: Activity) {
     }
 
     val googleSignInClient: GoogleSignInClient by lazy {
-        GoogleSignIn.getClient(activity, gso)
+        GoogleSignIn.getClient(context, gso)
     }
 
     fun getSignInIntent(): Intent {
@@ -51,7 +56,7 @@ class GoogleAuthManager(private val activity: Activity) {
             val result = auth.signInWithCredential(credential).await()
             result.user
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("GoogleAuthManager", "Sign in failed", e)
             null
         }
     }
@@ -68,29 +73,13 @@ class GoogleAuthManager(private val activity: Activity) {
 
     suspend fun getAccessToken(): String? {
         return try {
-            val account = GoogleSignIn.getLastSignedInAccount(activity)
+            val account = GoogleSignIn.getLastSignedInAccount(context)
             account?.idToken
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("GoogleAuthManager", "Get access token failed", e)
             null
         }
     }
 
-    suspend fun getDriveAccessToken(): String? {
-        return try {
-            val account = GoogleSignIn.getLastSignedInAccount(activity)
-            account?.serverAuthCode
-            account?.let {
-                // Request access token specifically for Drive API
-                val scope = "https://www.googleapis.com/auth/drive.file"
-                null // We'll handle this differently - see DriveStorageManager
-            }
-            null
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    fun getGoogleAccount() = GoogleSignIn.getLastSignedInAccount(activity)
+    fun getGoogleAccount() = GoogleSignIn.getLastSignedInAccount(context)
 }

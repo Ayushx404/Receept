@@ -1,219 +1,212 @@
 package com.receiptwarranty.app.ui.screens
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Receipt
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import com.receiptwarranty.app.data.ReceiptWarranty
 import com.receiptwarranty.app.data.WarrantyFilter
+import com.receiptwarranty.app.data.sync.SyncStatus
+import com.receiptwarranty.app.ui.components.BannerType
+import com.receiptwarranty.app.ui.components.DefaultTopBar
+import com.receiptwarranty.app.ui.components.DestructiveConfirmDialog
+import com.receiptwarranty.app.ui.components.EmptyStateType
+import com.receiptwarranty.app.ui.components.EmptyStateView
+import com.receiptwarranty.app.ui.components.HomeSearchBar
 import com.receiptwarranty.app.ui.components.ItemCard
+import com.receiptwarranty.app.ui.components.SelectionTopBar
+import com.receiptwarranty.app.ui.components.SyncStatusBanner
+import com.receiptwarranty.app.ui.theme.Spacing
+import com.receiptwarranty.app.viewmodel.HomeUiState
+import com.receiptwarranty.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    items: List<ReceiptWarranty>,
-    searchQuery: String,
-    warrantyFilter: WarrantyFilter,
+    uiState: HomeUiState,
     onSearchQueryChange: (String) -> Unit,
     onWarrantyFilterChange: (WarrantyFilter) -> Unit,
+    onTagToggle: (String) -> Unit,
     onItemClick: (ReceiptWarranty) -> Unit,
-    onAddClick: () -> Unit,
-    isSelectionMode: Boolean = false,
-    selectedItems: Set<Long> = emptySet(),
-    onEnterSelectionMode: (ReceiptWarranty) -> Unit = {},
-    onSelectItem: (Long) -> Unit = {},
-    onExitSelectionMode: () -> Unit = {},
-    onDeleteSelected: () -> Unit = {}
+    onEnterSelectionMode: (ReceiptWarranty) -> Unit,
+    onEnterSelectionModeEmpty: () -> Unit,
+    onSelectItem: (Long) -> Unit,
+    onExitSelectionMode: () -> Unit,
+    onDeleteSelected: () -> Unit,
+    modifier: Modifier = Modifier,
+    onShareSelected: (() -> Unit)? = null,
+    onRetrySync: (() -> Unit)? = null,
+    onSync: () -> Unit = {}
 ) {
+    var showSearch by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    val bannerVisible = uiState.isOffline ||
+        uiState.syncStatus is SyncStatus.Syncing ||
+        uiState.syncStatus is SyncStatus.Error
+    val bannerType = when {
+        uiState.syncStatus is SyncStatus.Error -> BannerType.SYNC_ERROR
+        uiState.syncStatus is SyncStatus.Syncing -> BannerType.SYNCING
+        else -> BannerType.OFFLINE
+    }
+    val bannerMsg = when (val s = uiState.syncStatus) {
+        is SyncStatus.Error -> s.message.ifBlank { "Sync failed" }
+        else -> ""
+    }
+
+    val isSyncing = uiState.syncStatus is SyncStatus.Syncing
+    val pullRefreshState = rememberPullToRefreshState()
+
+    if (pullRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            onSync()
+        }
+    }
+
+    LaunchedEffect(isSyncing) {
+        if (!isSyncing) pullRefreshState.endRefresh()
+    }
+
     Scaffold(
         topBar = {
-            if (isSelectionMode) {
-                TopAppBar(
-                    title = { Text("${selectedItems.size} selected") },
-                    actions = {
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete selected",
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        IconButton(onClick = onExitSelectionMode) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel")
-                        }
+            when {
+                uiState.isSelectionMode -> SelectionTopBar(
+                    selectedCount = uiState.selectedIds.size,
+                    onDelete = { showDeleteDialog = true },
+                    onShare = if (uiState.selectedIds.size == 1) onShareSelected else null,
+                    onExitSelection = onExitSelectionMode
+                )
+                showSearch -> HomeSearchBar(
+                    query = uiState.searchQuery,
+                    onQueryChange = onSearchQueryChange,
+                    onClose = {
+                        showSearch = false
+                        onSearchQueryChange("")
                     }
                 )
+                else -> DefaultTopBar(
+                    title = "Vault",
+                    onSearchClick = { showSearch = true },
+                    scrollBehavior = scrollBehavior
+                )
             }
-        }
-    ) { padding ->
-        Column(
+        },
+        modifier = modifier
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(paddingValues)
+                .nestedScroll(pullRefreshState.nestedScrollConnection)
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
         ) {
-            if (!isSelectionMode) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    placeholder = { Text("Search by title, company, or notes...") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    },
-                    singleLine = true
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = warrantyFilter == WarrantyFilter.ALL,
-                        onClick = { onWarrantyFilterChange(WarrantyFilter.ALL) },
-                        label = { Text("All") }
-                    )
-                    FilterChip(
-                        selected = warrantyFilter == WarrantyFilter.ALL_RECEIPTS,
-                        onClick = { onWarrantyFilterChange(WarrantyFilter.ALL_RECEIPTS) },
-                        label = { Text("Receipts") }
-                    )
-                    FilterChip(
-                        selected = warrantyFilter == WarrantyFilter.ALL_WARRANTIES,
-                        onClick = { onWarrantyFilterChange(WarrantyFilter.ALL_WARRANTIES) },
-                        label = { Text("Warranties") }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                item {
+                    SyncStatusBanner(
+                        visible = bannerVisible,
+                        type = bannerType,
+                        message = bannerMsg,
+                        onRetry = if (bannerType == BannerType.SYNC_ERROR) onRetrySync else null
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = warrantyFilter == WarrantyFilter.EXPIRING_SOON,
-                        onClick = { onWarrantyFilterChange(WarrantyFilter.EXPIRING_SOON) },
-                        label = { Text("Expiring Soon") }
-                    )
-                    FilterChip(
-                        selected = warrantyFilter == WarrantyFilter.EXPIRED,
-                        onClick = { onWarrantyFilterChange(WarrantyFilter.EXPIRED) },
-                        label = { Text("Expired") }
-                    )
-                }
-            }
+                if (!uiState.isSelectionMode) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(vertical = Spacing.sm),
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                        ) {
+                            WarrantyFilter.entries.forEach { filter ->
+                                FilterChip(
+                                    selected = uiState.warrantyFilter == filter,
+                                    onClick = { onWarrantyFilterChange(filter) },
+                                    label = { Text(filter.displayName) }
+                                )
+                            }
+                        }
+                    }
 
-            if (items.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Receipt,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = if (searchQuery.isNotEmpty()) "No results found" else "No items yet",
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        Text(
-                            text = if (searchQuery.isNotEmpty()) {
-                                "Try a different search term"
-                            } else {
-                                "Tap + to add your first receipt or warranty"
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                }
+
+                if (uiState.items.isEmpty()) {
+                    item {
+                        EmptyStateView(
+                            type = if (uiState.searchQuery.isNotBlank() || uiState.warrantyFilter != WarrantyFilter.ALL)
+                                EmptyStateType.NO_SEARCH_RESULTS
+                            else EmptyStateType.EMPTY,
+                            modifier = Modifier.fillParentMaxSize()
                         )
                     }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(items, key = { it.id }) { item ->
+                } else {
+                    items(uiState.items, key = { it.id }) { item ->
                         ItemCard(
                             item = item,
                             onClick = { onItemClick(item) },
-                            isSelectionMode = isSelectionMode,
-                            isSelected = selectedItems.contains(item.id),
+                            isSelectionMode = uiState.isSelectionMode,
+                            isSelected = uiState.selectedIds.contains(item.id),
                             onLongClick = { onEnterSelectionMode(item) },
                             onSelect = { onSelectItem(item.id) }
                         )
                     }
                 }
             }
+
+            PullToRefreshContainer(
+                state = pullRefreshState,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
         }
     }
 
     if (showDeleteDialog) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete ${selectedItems.size} items?") },
-            text = { Text("This action cannot be undone. Items will be deleted from cloud storage as well.") },
-            confirmButton = {
-                androidx.compose.material3.Button(
-                    onClick = {
-                        onDeleteSelected()
-                        showDeleteDialog = false
-                    },
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text("Delete")
-                }
+        val count = uiState.selectedIds.size
+        DestructiveConfirmDialog(
+            title = pluralStringResource(R.plurals.delete_items_title, count, count),
+            itemDescription = pluralStringResource(R.plurals.selected_items_description, count, count),
+            onConfirm = {
+                onDeleteSelected()
+                showDeleteDialog = false
             },
-            dismissButton = {
-                androidx.compose.material3.OutlinedButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showDeleteDialog = false }
         )
     }
 }
+
+
+private val WarrantyFilter.displayName: String
+    get() = when (this) {
+        WarrantyFilter.ALL -> "All"
+        WarrantyFilter.ALL_RECEIPTS -> "Receipts"
+        WarrantyFilter.ALL_WARRANTIES -> "Warranties"
+        WarrantyFilter.ALL_BILLS -> "Bills"
+        WarrantyFilter.SUBSCRIPTIONS -> "Subscriptions"
+        WarrantyFilter.EXPIRING_SOON -> "Expiring / Due Soon"
+        WarrantyFilter.EXPIRED -> "Expired"
+    }

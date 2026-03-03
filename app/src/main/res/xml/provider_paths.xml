@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Allow sharing files from the external cache directory -->
+    <external-cache-path name="shared_files" path="." />
+    <!-- Allow sharing files from the internal cache directory -->
+    <cache-path name="internal_shared_files" path="." />
+</paths>
